@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARMIR - Repostería Fina & Postres Artesanales</title>
+    <style>
+        :root {
+            --bg-crema: #FAF3E0;
+            --bg-superficie: #FFFFFF;
+            --primario-rosa: #E28D8D;
+            --primario-hover: #D47A7A;
+            --acento-canela: #B37D4E;
+            --acento-dorado: #D29D6A;
+            --texto-oscuro: #4A3B32;
+            --texto-mutado: #7D6E65;
+            --borde-suave: #F0E2D0;
+            --fuente-base: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --sombra-tarjeta: 0 4px 15px rgba(74, 59, 50, 0.08);
+            --radio: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente-base);
+            background-color: var(--bg-crema);
+            color: var(--texto-oscuro);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Barra de navegación */
+        .navbar {
+            background-color: var(--acento-dorado);
+            color: #FFFFFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-brand {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #FFFFFF;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 1.8rem;
+            align-items: center;
+        }
+
+        .navbar-nav a {
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: opacity 0.2s ease;
+        }
+
+        .navbar-nav a:hover,
+        .navbar-nav a.active {
+            opacity: 0.9;
+            text-decoration: underline;
+            text-underline-offset: 6px;
+        }
+
+        .cart-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            text-decoration: none !important;
+            font-weight: 600 !important;
+            transition: background 0.2s ease;
+        }
+
+        .cart-indicator:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        /* Banner Hero Principal */
+        .hero {
+            background: linear-gradient(180deg, #FBEBD6 0%, var(--bg-crema) 100%);
+            text-align: center;
+            padding: 4.5rem 1.5rem 3.5rem;
+            border-bottom: 1px solid var(--borde-suave);
+        }
+
+        .hero h1 {
+            font-size: 2.6rem;
+            color: #5C4033;
+            margin-bottom: 0.8rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--texto-mutado);
+            max-width: 650px;
+            margin: 0 auto 2rem;
+        }
+
+        .btn-hero {
+            background-color: var(--primario-rosa);
+            color: #FFFFFF;
+            padding: 0.9rem 2.4rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 14px rgba(226, 141, 141, 0.4);
+            transition: all 0.25s ease;
+        }
+
+        .btn-hero:hover {
+            background-color: var(--primario-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(226, 141, 141, 0.5);
+        }
+
+        /* Sección de Especialidades */
+        .contenedor-seccion {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem 4rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        .seccion-encabezado {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .seccion-titulo {
+            font-size: 2rem;
+            color: var(--texto-oscuro);
+            position: relative;
+            display: inline-block;
+        }
+
+        .seccion-titulo::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background-color: var(--primario-rosa);
+            margin: 0.6rem auto 0;
+            border-radius: 2px;
+        }
+
+        .seccion-subtitulo {
+            color: var(--texto-mutado);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        .grid-especialidades {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Tarjeta de Postre */
+        .tarjeta-postre {
+            background-color: var(--bg-superficie);
+            border-radius: var(--radio);
+            border: 1px solid var(--borde-suave);
+            overflow: hidden;
+            box-shadow: var(--sombra-tarjeta);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .tarjeta-postre:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(74, 59, 50, 0.12);
+        }
+
+        .imagen-placeholder {
+            width: 100%;
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.15rem;
+            position: relative;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .badge-categoria {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(255, 255, 255, 0.92);
+            color: var(--texto-oscuro);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.7rem;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tarjeta-contenido {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .tarjeta-contenido h3 {
+            font-size: 1.3rem;
+            color: var(--texto-oscuro);
+            margin-bottom: 0.4rem;
+        }
+
+        .tarjeta-contenido p {
+            color: var(--texto-mutado);
+            font-size: 0.9rem;
+            margin-bottom: 1.2rem;
+            flex: 1;
+        }
+
+        .tarjeta-precio-fila {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1.2rem;
+            border-top: 1px dashed var(--borde-suave);
+            padding-top: 0.8rem;
+        }
+
+        .precio-etiqueta {
+            font-size: 0.85rem;
+            color: var(--texto-mutado);
+        }
+
+        .tarjeta-precio {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--acento-canela);
+        }
+
+        .tarjeta-acciones {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .btn-personalizar-postre {
+            background-color: var(--primario-rosa);
+            color: #FFFFFF;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-personalizar-postre:hover {
+            background-color: var(--primario-hover);
+        }
+
+        .btn-compra-rapida {
+            background-color: #4A3B32;
+            color: #FFFFFF;
+            border: none;
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-compra-rapida:hover {
+            background-color: #332822;
+        }
+
+        /* Notificación Flotante (Toast) */
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #4A3B32;
+            color: #FFFFFF;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            font-size: 0.95rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        .toast.mostrar {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Pie de página */
+        footer {
+            background-color: #3B2E28;
+            color: #E2D9D2;
+            padding: 2.5rem 1rem 1.8rem;
+            font-size: 0.85rem;
+            margin-top: auto;
+            border-top: 4px solid var(--primario-rosa);
+        }
+
+        .footer-contenido {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-col h4 {
+            color: #FBEBD6;
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .footer-col p {
+            color: #D2C5BB;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.2rem;
+            list-style: none;
+        }
+
+        .footer-links a {
+            color: #E2D9D2;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primario-rosa);
+        }
+
+        .footer-copy {
+            text-align: center;
+            padding-top: 1.2rem;
+            color: #A89B92;
+            font-size: 0.8rem;
+        }
+
+        .link-admin-discreto {
+            color: rgba(226, 217, 210, 0.4);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.2s ease;
+        }
+
+        .link-admin-discreto:hover {
+            color: var(--primario-rosa);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            .hero h1 {
+                font-size: 2.1rem;
+            }
+            .footer-contenido {
+                flex-direction: column;
+                text-align: center;
+            }
+            .footer-links {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navegación Principal -->
+    <header class="navbar">
+        <a href="index.html" class="navbar-brand">
+            🎂 CARMIR
+        </a>
+        <nav>
+            <ul class="navbar-nav">
+                <li><a href="index.html" class="active">Inicio</a></li>
+                <li><a href="catalogo.html">Catálogo</a></li>
+                <li><a href="seguimiento.html">Seguimiento</a></li>
+                <li>
+                    <a href="carrito.html" class="cart-indicator">
+                        🛒 Carrito (<span id="cart-counter">0</span>)
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Banner Hero Principal -->
+    <section class="hero">
+        <h1>¡Los mejores pasteles y gelatinas de la ciudad!</h1>
+        <p>Tradición, pasión y sabor casero para celebrar tus fiestas, reuniones familiares y momentos más especiales.</p>
+        <a href="catalogo.html" class="btn-hero">Explorar Menú Completo</a>
+    </section>
+
+    <!-- Especialidades Destacadas (RF-09) -->
+    <main class="contenedor-seccion">
+        <div class="seccion-encabezado">
+            <h2 class="seccion-titulo">Nuestras Especialidades</h2>
+            <p class="seccion-subtitulo">Selecciona una de nuestras recetas insignia o personalízala a tu gusto</p>
+        </div>
+
+        <div class="grid-especialidades">
+            
+            <!-- Postre 1: Pastel de Tres Leches -->
+            <article class="tarjeta-postre">
+                <div class="imagen-placeholder" style="background: linear-gradient(135deg, #FFF9E6 0%, #F5E5C9 100%); color: #7B6843;">
+                    <span class="badge-categoria">Pasteles Clásicos</span>
+                    <span style="font-size: 3rem; margin-bottom: 0.4rem;">🎂</span>
+                    <span>Tres Leches Tradicional</span>
+                </div>
+                <div class="tarjeta-contenido">
+                    <h3>Pastel de Tres Leches</h3>
+                    <p>Clásico bizcocho bañado en tres leches casera, decorado con láminas de durazno en almíbar y trozos de nuez selecta.</p>
+                    
+                    <div class="tarjeta-precio-fila">
+                        <span class="precio-etiqueta">Precio base:</span>
+                        <span class="tarjeta-precio">$350.00 MXN</span>
+                    </div>
+
+                    <div class="tarjeta-acciones">
+                        <a href="personalizar.html?id=1" class="btn-personalizar-postre">
+                            ✨ Personalizar Pedido
+                        </a>
+                        <button type="button" class="btn-compra-rapida" onclick="agregarAlCarritoRapido(1, 'Pastel de Tres Leches', 350.00, 'Chico (10-12 pax)', 'Tres Leches', 'Durazno y Nuez', 'Chantilly')">
+                            + Agregar al carrito rápido
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Postre 2: Gelatina de Mosaico -->
+            <article class="tarjeta-postre">
+                <div class="imagen-placeholder" style="background: linear-gradient(135deg, #E8F0FE 0%, #C7D9FB 100%); color: #435E8B;">
+                    <span class="badge-categoria">Gelatinas de Leche</span>
+                    <span style="font-size: 3rem; margin-bottom: 0.4rem;">🍮</span>
+                    <span>Gelatina de Mosaico</span>
+                </div>
+                <div class="tarjeta-contenido">
+                    <h3>Gelatina de Mosaico</h3>
+                    <p>Suave y cremosa base de leche condensada con cubos de gelatina de sabores frutales variados (fresa, piña y limón).</p>
+                    
+                    <div class="tarjeta-precio-fila">
+                        <span class="precio-etiqueta">Precio base:</span>
+                        <span class="tarjeta-precio">$180.00 MXN</span>
+                    </div>
+
+                    <div class="tarjeta-acciones">
+                        <a href="personalizar.html?id=2" class="btn-personalizar-postre">
+                            ✨ Personalizar Pedido
+                        </a>
+                        <button type="button" class="btn-compra-rapida" onclick="agregarAlCarritoRapido(2, 'Gelatina de Mosaico', 180.00, 'Grande (12-15 pax)', 'Base Leche', 'Frutas variadas', 'Natural')">
+                            + Agregar al carrito rápido
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Postre 3: Pastel de Chocolate -->
+            <article class="tarjeta-postre">
+                <div class="imagen-placeholder" style="background: linear-gradient(135deg, #4A3525 0%, #2E1F16 100%); color: #F0DFD5;">
+                    <span class="badge-categoria">Pasteles Clásicos</span>
+                    <span style="font-size: 3rem; margin-bottom: 0.4rem;">🍫</span>
+                    <span>Chocolate Supremo</span>
+                </div>
+                <div class="tarjeta-contenido">
+                    <h3>Pastel de Chocolate</h3>
+                    <p>Doble cubierta de ganache de chocolate semi-amargo de alta pureza y relleno artesanal de compota de fresas frescas.</p>
+                    
+                    <div class="tarjeta-precio-fila">
+                        <span class="precio-etiqueta">Precio base:</span>
+                        <span class="tarjeta-precio">$380.00 MXN</span>
+                    </div>
+
+                    <div class="tarjeta-acciones">
+                        <a href="personalizar.html?id=3" class="btn-personalizar-postre">
+                            ✨ Personalizar Pedido
+                        </a>
+                        <button type="button" class="btn-compra-rapida" onclick="agregarAlCarritoRapido(3, 'Pastel de Chocolate', 380.00, 'Mediano (15-20 pax)', 'Pan Normal de Chocolate', 'Fresa natural', 'Ganache Semi-Amargo')">
+                            + Agregar al carrito rápido
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+    </main>
+
+    <!-- Toast de Notificación -->
+    <div id="toast" class="toast">Producto agregado a tu carrito correctamente.</div>
+
+    <!-- Pie de página -->
+    <footer>
+        <div class="footer-contenido">
+            <div class="footer-col">
+                <h4>CARMIR Repostería</h4>
+                <p>Delicias artesanales horneadas diariamente con los ingredientes más frescos.<br>León, Guanajuato.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Navegación</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="catalogo.html">Catálogo</a></li>
+                    <li><a href="seguimiento.html">Seguimiento</a></li>
+                    <li><a href="carrito.html">Carrito</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contacto</h4>
+                <p>WhatsApp: (477) 123-4567<br>Horario: Lun - Sáb: 9:00 AM - 7:00 PM</p>
+            </div>
+        </div>
+
+        <div class="footer-copy">
+            <p>&copy; 2026 Sistema CARMIR - Desarrollado para Delicias de Postres. Todos los derechos reservados. | 
+               <a href="admin-login.html" class="link-admin-discreto">Acceso Administrativo</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Lógica de Estado y Persistencia del Carrito (RNF-7) -->
+    <script>
+        function obtenerCarrito() {
+            return JSON.parse(localStorage.getItem('carmir_carrito')) || [];
+        }
+
+        function guardarCarrito(carrito) {
+            localStorage.setItem('carmir_carrito', JSON.stringify(carrito));
+            actualizarContador();
+        }
+
+        function actualizarContador() {
+            const carrito = obtenerCarrito();
+            const total = carrito.reduce((acum, item) => acum + (item.cantidad || 1), 0);
+            const contadorEl = document.getElementById('cart-counter');
+            if (contadorEl) {
+                contadorEl.textContent = total;
+            }
+        }
+
+        function mostrarToast(mensaje) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensaje;
+            toast.classList.add('mostrar');
+            setTimeout(() => {
+                toast.classList.remove('mostrar');
+            }, 2500);
+        }
+
+        function agregarAlCarritoRapido(id, nombre, precio, tamano, pan, relleno, cobertura) {
+            const carrito = obtenerCarrito();
+            const existente = carrito.find(item => item.id === id && item.tamano === tamano && item.relleno === relleno);
+
+            if (existente) {
+                existente.cantidad = (existente.cantidad || 1) + 1;
+            } else {
+                carrito.push({
+                    id: id,
+                    nombre: nombre,
+                    precio: precio,
+                    tamano: tamano,
+                    pan: pan,
+                    relleno: relleno,
+                    cobertura: cobertura,
+                    dedicatoria: "",
+                    extras: [],
+                    cantidad: 1
+                });
+            }
+
+            guardarCarrito(carrito);
+            mostrarToast(`"${nombre}" se agregó al carrito.`);
+        }
+
+        document.addEventListener('DOMContentLoaded', actualizarContador);
+    </script>
+</body>
+</html>

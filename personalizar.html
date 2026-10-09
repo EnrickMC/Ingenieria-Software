@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalizar Postre - CARMIR</title>
+    <style>
+        :root {
+            --bg-crema: #FAF3E0;
+            --bg-superficie: #FFFFFF;
+            --primario-rosa: #E28D8D;
+            --primario-hover: #D47A7A;
+            --acento-canela: #B37D4E;
+            --acento-dorado: #D29D6A;
+            --texto-oscuro: #4A3B32;
+            --texto-mutado: #7D6E65;
+            --borde-suave: #F0E2D0;
+            --alerta-bg: #FDF2F2;
+            --alerta-texto: #C53030;
+            --alerta-borde: #FED7D7;
+            --fuente-base: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --sombra: 0 4px 15px rgba(74, 59, 50, 0.08);
+            --radio: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente-base);
+            background-color: var(--bg-crema);
+            color: var(--texto-oscuro);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Barra de navegación */
+        .navbar {
+            background-color: var(--acento-dorado);
+            color: #FFFFFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-brand {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #FFFFFF;
+            text-decoration: none;
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 1.8rem;
+            align-items: center;
+        }
+
+        .navbar-nav a {
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: opacity 0.2s ease;
+        }
+
+        .navbar-nav a:hover,
+        .navbar-nav a.active {
+            opacity: 0.85;
+            text-decoration: underline;
+            text-underline-offset: 6px;
+        }
+
+        .cart-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            text-decoration: none !important;
+            font-weight: 600 !important;
+        }
+
+        /* Contenedor Principal */
+        .contenedor-configurador {
+            max-width: 1200px;
+            margin: 2rem auto 4rem;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 2.5rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Panel Izquierdo: Vista previa y desglose de costos */
+        .panel-preview {
+            position: sticky;
+            top: 5.5rem;
+            height: fit-content;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .tarjeta-preview {
+            background-color: var(--bg-superficie);
+            border-radius: var(--radio);
+            border: 1px solid var(--borde-suave);
+            box-shadow: var(--sombra);
+            overflow: hidden;
+        }
+
+        .preview-img-box {
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, #FFF9E6 0%, #F5E5C9 100%);
+            color: #7B6843;
+            border-bottom: 1px solid var(--borde-suave);
+            position: relative;
+        }
+
+        .preview-badge-cat {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--texto-oscuro);
+        }
+
+        .preview-titulo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+
+        .preview-subtitulo {
+            font-size: 0.85rem;
+            color: #8C6D3B;
+        }
+
+        .preview-body {
+            padding: 1.5rem;
+        }
+
+        .resumen-decoradores {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            font-size: 0.88rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 1px dashed var(--borde-suave);
+            padding-bottom: 1rem;
+        }
+
+        .resumen-decoradores li {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .resumen-decoradores .item-nombre {
+            color: var(--texto-mutado);
+        }
+
+        .resumen-decoradores .item-valor {
+            font-weight: 600;
+            color: var(--texto-oscuro);
+            text-align: right;
+            max-width: 60%;
+        }
+
+        .desglose-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .desglose-total span {
+            font-size: 1rem;
+            color: var(--texto-mutado);
+        }
+
+        .desglose-total strong {
+            font-size: 1.6rem;
+            color: var(--acento-canela);
+        }
+
+        /* Panel Derecho: Opciones de personalización */
+        .panel-formulario {
+            background-color: var(--bg-superficie);
+            border-radius: var(--radio);
+            border: 1px solid var(--borde-suave);
+            box-shadow: var(--sombra);
+            padding: 2.2rem;
+        }
+
+        .encabezado-form {
+            border-bottom: 2px solid #F6E2C9;
+            padding-bottom: 1rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .encabezado-form h2 {
+            font-size: 1.6rem;
+            color: var(--texto-oscuro);
+        }
+
+        .encabezado-form p {
+            color: var(--texto-mutado);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Alerta de restricción / excepción */
+        .alerta-excepcion {
+            display: none;
+            background-color: var(--alerta-bg);
+            color: var(--alerta-texto);
+            border: 1px solid var(--alerta-borde);
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .alerta-excepcion.activo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Grupos de campos */
+        .grupo-seccion {
+            margin-bottom: 1.8rem;
+        }
+
+        .grupo-seccion-titulo {
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--acento-canela);
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .campo-control {
+            margin-bottom: 1.2rem;
+        }
+
+        .campo-control label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--texto-oscuro);
+            margin-bottom: 0.4rem;
+        }
+
+        .campo-control select,
+        .campo-control input[type="text"],
+        .campo-control textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #DCD0C0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: #FAF6F0;
+            color: var(--texto-oscuro);
+            outline: none;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .campo-control select:focus,
+        .campo-control input[type="text"]:focus,
+        .campo-control textarea:focus {
+            border-color: var(--acento-dorado);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(210, 157, 106, 0.15);
+        }
+
+        .campo-control textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .fila-doble {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        /* Opciones de extras / decoradores adicionales */
+        .grid-extras {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .extra-checkbox-card {
+            background-color: #FAF6F0;
+            border: 1px solid var(--borde-suave);
+            border-radius: 8px;
+            padding: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .extra-checkbox-card:hover {
+            border-color: var(--acento-dorado);
+            background-color: #F8EFE4;
+        }
+
+        .extra-checkbox-card input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--acento-canela);
+            cursor: pointer;
+        }
+
+        .extra-info {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.85rem;
+        }
+
+        .extra-info strong {
+            color: var(--texto-oscuro);
+        }
+
+        .extra-info span {
+            color: var(--acento-canela);
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        /* Botón de envío */
+        .btn-confirmar-personalizacion {
+            background-color: var(--primario-rosa);
+            color: #FFFFFF;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(226, 141, 141, 0.4);
+            transition: all 0.25s ease;
+            margin-top: 1rem;
+        }
+
+        .btn-confirmar-personalizacion:hover {
+            background-color: var(--primario-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(226, 141, 141, 0.5);
+        }
+
+        .enlace-volver {
+            display: inline-block;
+            margin-top: 1.2rem;
+            color: var(--acento-canela);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .enlace-volver:hover {
+            text-decoration: underline;
+        }
+
+        /* Toast emergente */
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #4A3B32;
+            color: #FFFFFF;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            font-size: 0.95rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 3000;
+        }
+
+        .toast.mostrar {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        footer {
+            background-color: #3B2E28;
+            color: #E2D9D2;
+            text-align: center;
+            padding: 1.8rem 1rem;
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 950px) {
+            .contenedor-configurador {
+                grid-template-columns: 1fr;
+            }
+            .panel-preview {
+                position: static;
+            }
+            .fila-doble {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navegación -->
+    <header class="navbar">
+        <a href="index.html" class="navbar-brand">CARMIR</a>
+        <nav>
+            <ul class="navbar-nav">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="catalogo.html" class="active">Catálogo</a></li>
+                <li><a href="seguimiento.html">Seguimiento</a></li>
+                <li>
+                    <a href="carrito.html" class="cart-indicator">
+                        🛒 Carrito (<span id="cart-counter">0</span>)
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Contenedor Principal del Configurador -->
+    <main class="contenedor-configurador">
+        
+        <!-- Panel Izquierdo: Vista Previa y Desglose Decorator -->
+        <aside class="panel-preview">
+            <div class="tarjeta-preview">
+                <div class="preview-img-box" id="preview-img-box">
+                    <span class="preview-badge-cat" id="preview-cat">Pasteles Clásicos</span>
+                    <div style="font-size: 3rem; margin-bottom: 0.3rem;">🎂</div>
+                    <div class="preview-titulo" id="preview-nombre">Pastel de Tres Leches</div>
+                    <div class="preview-subtitulo" id="preview-descripcion">Bizcocho tradicional</div>
+                </div>
+
+                <div class="preview-body">
+                    <h4 style="font-size: 1rem; color: var(--texto-oscuro); margin-bottom: 0.8rem;">
+                        Configuración en tiempo real:
+                    </h4>
+
+                    <ul class="resumen-decoradores">
+                        <li>
+                            <span class="item-nombre">Porciones / Tamaño:</span>
+                            <span class="item-valor" id="resumen-tamano">20 personas (x1.0)</span>
+                        </li>
+                        <li>
+                            <span class="item-nombre">Tipo de Pan / Base:</span>
+                            <span class="item-valor" id="resumen-base">Tres Leches</span>
+                        </li>
+                        <li>
+                            <span class="item-nombre">Sabor del Pan:</span>
+                            <span class="item-valor" id="resumen-sabor">Vainilla Tradicional</span>
+                        </li>
+                        <li>
+                            <span class="item-nombre">Relleno Artesanal:</span>
+                            <span class="item-valor" id="resumen-relleno">Crema pastelera y durazno</span>
+                        </li>
+                        <li>
+                            <span class="item-nombre">Cobertura:</span>
+                            <span class="item-valor" id="resumen-cobertura">Chantilly ligero</span>
+                        </li>
+                        <li>
+                            <span class="item-nombre">Decoradores Extra:</span>
+                            <span class="item-valor" id="resumen-extras">Ninguno</span>
+                        </li>
+                    </ul>
+
+                    <div class="desglose-total">
+                        <span>Precio Final Estimado:</span>
+                        <strong id="precio-final-display">$350.00 MXN</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="catalogo.html" class="enlace-volver">← Regresar al catálogo de postres</a>
+            </div>
+        </aside>
+
+        <!-- Panel Derecho: Formulario de Opciones Paramétricas -->
+        <section class="panel-formulario">
+            <div class="encabezado-form">
+                <h2>Diseña y Personaliza tu Postre</h2>
+                <p>Ajusta cada detalle. Los costos y proporciones de ingredientes se calculan algorítmicamente en tiempo real.</p>
+            </div>
+
+            <!-- Caja de Alerta de Excepción -->
+            <div id="alerta-excepcion" class="alerta-excepcion">
+                <span>⚠️</span>
+                <span id="mensaje-excepcion">Incompatibilidad técnica detectada.</span>
+            </div>
+
+            <form id="form-personalizar" onsubmit="procesarAgregarAlCarrito(event)">
+                
+                <!-- SECCIÓN 1: POSTRE BASE Y ESCALA -->
+                <div class="grupo-seccion">
+                    <div class="grupo-seccion-titulo">
+                        <span>1. Postre Base y Porciones</span>
+                        <span id="label-factor">Factor: x1.0</span>
+                    </div>
+
+                    <div class="fila-doble">
+                        <div class="campo-control">
+                            <label for="select-postre">Modelo de Postre:</label>
+                            <select id="select-postre" onchange="cargarPostreBase()">
+                                <option value="1">Pastel de Tres Leches</option>
+                                <option value="2">Gelatina de Mosaico (Leche)</option>
+                                <option value="3">Pastel de Chocolate Ganache</option>
+                                <option value="4">Gelatina de Rompope Artesanal</option>
+                                <option value="5">Pastel Imposible (Chocoflan)</option>
+                                <option value="6">Pastel de Fresa Especial</option>
+                                <option value="7">Brownies Clásicos</option>
+                            </select>
+                        </div>
+
+                        <div class="campo-control">
+                            <label for="select-porciones">Tamaño (20 a 200 personas):</label>
+                            <select id="select-porciones" onchange="recalcularPrecio()">
+                                <!-- Generado dinámicamente de 20 a 200 en pasos de 10 -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: FORMULACIÓN DE BIZCOCHO Y RELLENOS -->
+                <div class="grupo-seccion">
+                    <div class="grupo-seccion-titulo">
+                        <span>2. Bizcocho, Sabor y Relleno</span>
+                    </div>
+
+                    <div class="fila-doble">
+                        <div class="campo-control">
+                            <label for="select-tipo-pan">Tipo de Pan / Consistencia:</label>
+                            <select id="select-tipo-pan" onchange="recalcularPrecio()">
+                                <option value="tres-leches" data-costo="0">Tres Leches (Tradicional bañado)</option>
+                                <option value="normal" data-costo="0">Pastel Normal (Esponjoso estándar)</option>
+                                <option value="casero" data-costo="0">Casero de Mantequilla</option>
+                                <option value="gelatina-leche" data-costo="0">Base Leche y Crema</option>
+                                <option value="gelatina-agua" data-costo="-30">Base Agua y Frutas (-$30.00)</option>
+                            </select>
+                        </div>
+
+                        <div class="campo-control">
+                            <label for="select-sabor">Sabor Principal del Pan/Cuerpo:</label>
+                            <select id="select-sabor" onchange="recalcularPrecio()">
+                                <option value="Vainilla">Vainilla Natural</option>
+                                <option value="Chocolate">Chocolate Semi-Amargo</option>
+                                <option value="Moka">Moka Artesanal</option>
+                                <option value="Coco">Coco Tostado</option>
+                                <option value="Frutos Rojos">Frutos Rojos</option>
+                                <option value="Durazno">Durazno Natural</option>
+                                <option value="Fresa">Fresa Silvestre</option>
+                                <option value="Nuez">Nuez Pecana</option>
+                                <option value="Naranja Casera">Naranja Casera</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="campo-control">
+                        <label for="select-relleno">Relleno Artesanal:</label>
+                        <select id="select-relleno" onchange="recalcularPrecio()">
+                            <option value="Crema Pastelera con Fruta" data-costo="0">Crema pastelera y trozos de fruta (Durazno/Fresa) - Incluido</option>
+                            <option value="Crema de Mantequilla y Fruta" data-costo="25">Crema pastelera de mantequilla y fruta natural (+$25.00)</option>
+                            <option value="Cajeta Envinada" data-costo="20">Cajeta quemada tradicional (+$20.00)</option>
+                            <option value="Ganache de Chocolate" data-costo="30">Ganache de chocolate semi-amargo (+$30.00)</option>
+                            <option value="Doble Capa Mixta" data-costo="45">Doble capa: Sabor mixto de pastel intermedio (+$45.00)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: CAPAS DECORADORAS Y ADITAMENTOS -->
+                <div class="grupo-seccion">
+                    <div class="grupo-seccion-titulo">
+                        <span>3. Cobertura y Decoradores Adicionales</span>
+                    </div>
+
+                    <div class="fila-doble">
+                        <div class="campo-control">
+                            <label for="select-cobertura">Tipo de Cobertura:</label>
+                            <select id="select-cobertura" onchange="validarExcepciones(); recalcularPrecio();">
+                                <option value="Chantilly" data-costo="0">Chantilly Clásico de Vainilla</option>
+                                <option value="Mantequilla" data-costo="30">Buttercream / Crema de Mantequilla (+ $30)</option>
+                                <option value="Fondant" data-costo="90" data-mult="1.2">Fondant Esculpido a Mano (+ $90 + Multiplicador 1.2x)</option>
+                                <option value="Glaseado Espejo" data-costo="50">Glaseado Espejo Brillante (+ $50)</option>
+                            </select>
+                        </div>
+
+                        <div class="campo-control">
+                            <label for="select-pisos">Estructura de Pisos:</label>
+                            <select id="select-pisos" onchange="recalcularPrecio()">
+                                <option value="1" data-costo="0">1 Piso (Estándar)</option>
+                                <option value="2" data-costo="120">2 Pisos estructurados (+ $120.00)</option>
+                                <option value="3" data-costo="240">3 Pisos para eventos grandes (+ $240.00)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label style="font-size: 0.9rem; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 0.4rem; display: block;">
+                        Aditamentos Decorativos (Patrón Decorator):
+                    </label>
+
+                    <div class="grid-extras">
+                        <label class="extra-checkbox-card">
+                            <input type="checkbox" id="chk-perlas" data-nombre="Perlas Comestibles" data-costo="35" onchange="recalcularPrecio()">
+                            <div class="extra-info">
+                                <strong>Perlas Decorativas</strong>
+                                <span>+$35.00 MXN</span>
+                            </div>
+                        </label>
+
+                        <label class="extra-checkbox-card">
+                            <input type="checkbox" id="chk-liston" data-nombre="Listón de Tela Fino" data-costo="25" onchange="recalcularPrecio()">
+                            <div class="extra-info">
+                                <strong>Listón Satinado</strong>
+                                <span>+$25.00 MXN</span>
+                            </div>
+                        </label>
+
+                        <label class="extra-checkbox-card">
+                            <input type="checkbox" id="chk-mariposas" data-nombre="Mariposas de Oblea" data-costo="40" onchange="recalcularPrecio()">
+                            <div class="extra-info">
+                                <strong>Mariposas de Oblea 3D</strong>
+                                <span>+$40.00 MXN</span>
+                            </div>
+                        </label>
+
+                        <label class="extra-checkbox-card">
+                            <input type="checkbox" id="chk-encaje" data-nombre="Encaje de Azúcar" data-costo="50" onchange="recalcularPrecio()">
+                            <div class="extra-info">
+                                <strong>Encaje de Azúcar Comestible</strong>
+                                <span>+$50.00 MXN</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 4: DEDICATORIA Y LOGÍSTICA DE DETALLE -->
+                <div class="grupo-seccion">
+                    <div class="grupo-seccion-titulo">
+                        <span>4. Dedicatoria y Observaciones de Diseño</span>
+                    </div>
+
+                    <div class="campo-control">
+                        <label for="txt-dedicatoria">Mensaje o Leyenda en el Postre (Opcional):</label>
+                        <input type="text" id="txt-dedicatoria" placeholder="Ej. ¡Feliz 50 Aniversario Papás!" maxlength="60" oninput="actualizarTextoDedicatoria()">
+                    </div>
+
+                    <div class="campo-control">
+                        <label for="txt-observaciones">Indicaciones Especiales para Repostería:</label>
+                        <textarea id="txt-observaciones" placeholder="Indica detalles de colores deseados, temática o especificaciones para el horneado..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Botón de Envío -->
+                <button type="submit" id="btn-submit" class="btn-confirmar-personalizacion">
+                    Confirmar y Agregar al Carrito
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <!-- Notificación Flotante -->
+    <div id="toast" class="toast">¡Postre personalizado guardado en tu carrito!</div>
+
+    <!-- Pie de página -->
+    <footer>
+        <p>&copy; 2026 Sistema CARMIR - Desarrollado para Delicias de Postres. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Lógica de Negocio, Algoritmo Decorator y Persistencia -->
+    <script>
+        // Datos maestros de referencia
+        const POSTRES_DISPONIBLES = {
+            1: { nombre: "Pastel de Tres Leches", categoria: "Pasteles Clásicos", precioBase: 350.00, panDefecto: "tres-leches", icono: "🎂" },
+            2: { nombre: "Gelatina de Mosaico", categoria: "Gelatinas de Leche", precioBase: 180.00, panDefecto: "gelatina-leche", icono: "🍮" },
+            3: { nombre: "Pastel de Chocolate", categoria: "Pasteles Clásicos", precioBase: 380.00, panDefecto: "normal", icono: "🍫" },
+            4: { nombre: "Gelatina de Rompope", categoria: "Gelatinas de Leche", precioBase: 200.00, panDefecto: "gelatina-leche", icono: "🍮" },
+            5: { nombre: "Pastel Imposible", categoria: "Pasteles Clásicos", precioBase: 320.00, panDefecto: "normal", icono: "🥮" },
+            6: { nombre: "Pastel de Fresa Especial", categoria: "Pasteles Clásicos", precioBase: 320.00, panDefecto: "normal", icono: "🍓" },
+            7: { nombre: "Brownies Clásicos (Caja)", categoria: "Postres Individuales", precioBase: 150.00, panDefecto: "normal", icono: "🧁" }
+        };
+
+        // Reglas de Excepción (Entidad Excepcion del Diccionario de Datos)
+        const REGLAS_EXCEPCION = [
+            {
+                tipoPan: "tres-leches",
+                cobertura: "Fondant",
+                mensaje: "El pan de Tres Leches no es compatible con cobertura de Fondant debido a que el exceso de humedad disuelve el modelado de azúcar."
+            },
+            {
+                tipoPan: "gelatina-leche",
+                cobertura: "Fondant",
+                mensaje: "Las gelatinas no admiten cobertura de Fondant por temperatura y consistencia de cuajado."
+            },
+            {
+                tipoPan: "gelatina-agua",
+                cobertura: "Fondant",
+                mensaje: "Las gelatinas de agua no admiten cobertura de Fondant."
+            },
+            {
+                tipoPan: "gelatina-agua",
+                relleno: "Crema de Mantequilla y Fruta",
+                mensaje: "Las gelatinas de agua no admiten rellenos de crema de mantequilla."
+            }
+        ];
+
+        let precioCalculadoActual = 0;
+
+        // Generar selector de porciones de 20 a 200 personas (de 10 en 10)
+        function inicializarSelectorPorciones() {
+            const select = document.getElementById('select-porciones');
+            select.innerHTML = '';
+
+            for (let personas = 20; personas <= 200; personas += 10) {
+                // Cálculo de multiplicador: 20 personas es la base (x1.0), 30 es x1.4, 40 es x1.8, etc.
+                const factor = 1 + ((personas - 20) / 20) * 0.85;
+                const option = document.createElement('option');
+                option.value = personas;
+                option.dataset.factor = factor.toFixed(2);
+                option.textContent = `${personas} personas (Factor x${factor.toFixed(2)})`;
+                select.appendChild(option);
+            }
+        }
+
+        // Carga inicial según el parámetro de URL (?id=...)
+        function cargarPostreDesdeURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idParam = parseInt(urlParams.get('id'));
+
+            const selectPostre = document.getElementById('select-postre');
+            if (idParam && POSTRES_DISPONIBLES[idParam]) {
+                selectPostre.value = idParam;
+            }
+            cargarPostreBase();
+        }
+
+        function cargarPostreBase() {
+            const postreId = document.getElementById('select-postre').value;
+            const postre = POSTRES_DISPONIBLES[postreId];
+            if (!postre) return;
+
+            document.getElementById('preview-nombre').textContent = postre.nombre;
+            document.getElementById('preview-cat').textContent = postre.categoria;
+            document.getElementById('preview-img-box').querySelector('div:first-of-type').textContent = postre.icono;
+            
+            // Ajustar tipo de pan por defecto
+            const selectPan = document.getElementById('select-tipo-pan');
+            if (postre.panDefecto) {
+                selectPan.value = postre.panDefecto;
+            }
+
+            validarExcepciones();
+            recalcularPrecio();
+        }
+
+        // Validación de Excepciones Técnicas
+        function validarExcepciones() {
+            const tipoPan = document.getElementById('select-tipo-pan').value;
+            const cobertura = document.getElementById('select-cobertura').value;
+            const relleno = document.getElementById('select-relleno').value;
+            const alerta = document.getElementById('alerta-excepcion');
+            const mensajeEl = document.getElementById('mensaje-excepcion');
+            const btnSubmit = document.getElementById('btn-submit');
+
+            let conflicto = null;
+
+            for (const regla of REGLAS_EXCEPCION) {
+                if (regla.tipoPan === tipoPan && regla.cobertura === cobertura) {
+                    conflicto = regla.mensaje;
+                    break;
+                }
+                if (regla.tipoPan === tipoPan && regla.relleno === relleno) {
+                    conflicto = regla.mensaje;
+                    break;
+                }
+            }
+
+            if (conflicto) {
+                alerta.classList.add('activo');
+                mensajeEl.textContent = conflicto;
+                btnSubmit.disabled = true;
+                btnSubmit.style.opacity = '0.5';
+                btnSubmit.style.cursor = 'not-allowed';
+                return false;
+            } else {
+                alerta.classList.remove('activo');
+                btnSubmit.disabled = false;
+                btnSubmit.style.opacity = '1';
+                btnSubmit.style.cursor = 'pointer';
+                return true;
+            }
+        }
+
+        // Algoritmo de Cálculo Dinámico (Patrón Decorator)
+        function recalcularPrecio() {
+            if (!validarExcepciones()) return;
+
+            const postreId = document.getElementById('select-postre').value;
+            const postre = POSTRES_DISPONIBLES[postreId];
+            
+            const porcionesSelect = document.getElementById('select-porciones');
+            const porciones = porcionesSelect.value;
+            const factorPorcion = parseFloat(porcionesSelect.selectedOptions[0].dataset.factor || 1.0);
+
+            // 1. Costo Base reescalado por Porciones
+            let precioAcumulado = postre.precioBase * factorPorcion;
+
+            // 2. Capa Decoradora: Tipo de Pan
+            const panSelect = document.getElementById('select-tipo-pan');
+            const costoPan = parseFloat(panSelect.selectedOptions[0].dataset.costo || 0);
+            precioAcumulado += costoPan;
+
+            // 3. Capa Decoradora: Relleno
+            const rellenoSelect = document.getElementById('select-relleno');
+            const costoRelleno = parseFloat(rellenoSelect.selectedOptions[0].dataset.costo || 0);
+            precioAcumulado += costoRelleno;
+
+            // 4. Capa Decoradora: Cobertura y Multiplicador
+            const coberturaSelect = document.getElementById('select-cobertura');
+            const costoCobertura = parseFloat(coberturaSelect.selectedOptions[0].dataset.costo || 0);
+            const multCobertura = parseFloat(coberturaSelect.selectedOptions[0].dataset.mult || 1.0);
+            precioAcumulado = (precioAcumulado + costoCobertura) * multCobertura;
+
+            // 5. Capa Decoradora: Pisos
+            const pisosSelect = document.getElementById('select-pisos');
+            const costoPisos = parseFloat(pisosSelect.selectedOptions[0].dataset.costo || 0);
+            precioAcumulado += costoPisos;
+
+            // 6. Capas Decoradoras Extras (Checkboxes)
+            const extrasSeleccionados = [];
+            const checkboxes = document.querySelectorAll('.grid-extras input[type="checkbox"]:checked');
+            checkboxes.forEach(chk => {
+                const costoExtra = parseFloat(chk.dataset.costo);
+                precioAcumulado += costoExtra;
+                extrasSeleccionados.push(chk.dataset.nombre);
+            });
+
+            precioCalculadoActual = Math.round(precioAcumulado);
+
+            // Actualizar vista previa del desglose
+            document.getElementById('label-factor').textContent = `Factor Escala: x${factorPorcion.toFixed(2)}`;
+            document.getElementById('resumen-tamano').textContent = `${porciones} personas`;
+            document.getElementById('resumen-base').textContent = panSelect.selectedOptions[0].text.split('(')[0];
+            document.getElementById('resumen-sabor').textContent = document.getElementById('select-sabor').value;
+            document.getElementById('resumen-relleno').textContent = rellenoSelect.selectedOptions[0].text.split('(')[0];
+            document.getElementById('resumen-cobertura').textContent = coberturaSelect.selectedOptions[0].text.split('(')[0];
+            document.getElementById('resumen-extras').textContent = extrasSeleccionados.length > 0 ? extrasSeleccionados.join(', ') : 'Ninguno';
+            document.getElementById('precio-final-display').textContent = `$${precioCalculadoActual.toFixed(2)} MXN`;
+        }
+
+        function actualizarTextoDedicatoria() {
+            const dedicatoria = document.getElementById('txt-dedicatoria').value.trim();
+            const descEl = document.getElementById('preview-descripcion');
+            if (dedicatoria) {
+                descEl.textContent = `Dedicatoria: "${dedicatoria}"`;
+            } else {
+                descEl.textContent = "Personalización artesanal";
+            }
+        }
+
+        // Gestión de almacenamiento en LocalStorage
+        function obtenerCarrito() {
+            return JSON.parse(localStorage.getItem('carmir_carrito')) || [];
+        }
+
+        function guardarCarrito(carrito) {
+            localStorage.setItem('carmir_carrito', JSON.stringify(carrito));
+            actualizarContador();
+        }
+
+        function actualizarContador() {
+            const carrito = obtenerCarrito();
+            const total = carrito.reduce((acc, item) => acc + (item.cantidad || 1), 0);
+            const el = document.getElementById('cart-counter');
+            if (el) el.textContent = total;
+        }
+
+        function mostrarToast(mensaje) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensaje;
+            toast.classList.add('mostrar');
+            setTimeout(() => toast.classList.remove('mostrar'), 2500);
+        }
+
+        // Agregar al carrito y persistir configuración completa
+        function procesarAgregarAlCarrito(e) {
+            e.preventDefault();
+
+            if (!validarExcepciones()) {
+                alert("Por favor corrige las incompatibilidades indicadas antes de continuar.");
+                return;
+            }
+
+            const postreId = document.getElementById('select-postre').value;
+            const postre = POSTRES_DISPONIBLES[postreId];
+            const porciones = document.getElementById('select-porciones').value;
+            const pan = document.getElementById('select-tipo-pan').selectedOptions[0].text.split('(')[0].trim();
+            const sabor = document.getElementById('select-sabor').value;
+            const relleno = document.getElementById('select-relleno').selectedOptions[0].text.split('(')[0].trim();
+            const cobertura = document.getElementById('select-cobertura').selectedOptions[0].text.split('(')[0].trim();
+            const pisos = document.getElementById('select-pisos').value;
+            const dedicatoria = document.getElementById('txt-dedicatoria').value.trim();
+            const observaciones = document.getElementById('txt-observaciones').value.trim();
+
+            const extras = [];
+            document.querySelectorAll('.grid-extras input[type="checkbox"]:checked').forEach(c => extras.push(c.dataset.nombre));
+
+            const nuevoItem = {
+                id: parseInt(postreId),
+                nombre: postre.nombre,
+                categoria: postre.categoria,
+                precio: precioCalculadoActual,
+                tamano: `${porciones} personas (${pisos} piso/s)`,
+                relleno: `${sabor} | Relleno: ${relleno}`,
+                cobertura: cobertura,
+                pan: pan,
+                extras: extras,
+                dedicatoria: dedicatoria,
+                observaciones: observaciones,
+                cantidad: 1
+            };
+
+            const carrito = obtenerCarrito();
+            carrito.push(nuevoItem);
+            guardarCarrito(carrito);
+
+            mostrarToast(`"${postre.nombre}" configurado y agregado al carrito.`);
+
+            // Redirección opcional o fluida al carrito tras 1 segundo
+            setTimeout(() => {
+                window.location.href = "carrito.html";
+            }, 1200);
+        }
+
+        // Inicialización al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarSelectorPorciones();
+            cargarPostreDesdeURL();
+            actualizarContador();
+        });
+    </script>
+</body>
+</html>

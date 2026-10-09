@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Postres - CARMIR</title>
+    <style>
+        :root {
+            --bg-crema: #FAF3E0;
+            --bg-superficie: #FFFFFF;
+            --primario-rosa: #E28D8D;
+            --primario-hover: #D47A7A;
+            --acento-canela: #B37D4E;
+            --acento-dorado: #D29D6A;
+            --texto-oscuro: #4A3B32;
+            --texto-mutado: #7D6E65;
+            --borde-suave: #F0E2D0;
+            --fuente-base: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --sombra-tarjeta: 0 4px 15px rgba(74, 59, 50, 0.06);
+            --radio: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente-base);
+            background-color: var(--bg-crema);
+            color: var(--texto-oscuro);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Barra de navegación superior */
+        .navbar {
+            background-color: var(--acento-dorado);
+            color: #FFFFFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-brand {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #FFFFFF;
+            text-decoration: none;
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 1.8rem;
+            align-items: center;
+        }
+
+        .navbar-nav a {
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: opacity 0.2s ease;
+        }
+
+        .navbar-nav a:hover,
+        .navbar-nav a.active {
+            opacity: 0.85;
+            text-decoration: underline;
+            text-underline-offset: 6px;
+        }
+
+        .cart-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            text-decoration: none !important;
+            font-weight: 600 !important;
+        }
+
+        /* Contenedor Principal */
+        .contenedor-catalogo {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 2.5rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Barra lateral de filtros */
+        .sidebar-filtros {
+            background-color: var(--bg-superficie);
+            border-radius: var(--radio);
+            border: 1px solid var(--borde-suave);
+            padding: 1.5rem;
+            box-shadow: var(--sombra-tarjeta);
+            height: fit-content;
+            position: sticky;
+            top: 5rem;
+        }
+
+        .sidebar-filtros h3 {
+            font-size: 1.15rem;
+            color: var(--texto-oscuro);
+            border-bottom: 2px solid #F6E2C9;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .lista-categorias {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .btn-categoria {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 0.65rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--texto-oscuro);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-categoria:hover {
+            background-color: #F8EFE4;
+            color: var(--acento-canela);
+        }
+
+        .btn-categoria.activo {
+            background-color: var(--primario-rosa);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .conteo-cat {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            background: rgba(0, 0, 0, 0.08);
+            padding: 0.1rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        /* Área de contenido del catálogo */
+        .contenido-productos {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Barra de herramientas (Buscador y Ordenamiento) */
+        .barra-herramientas {
+            background-color: var(--bg-superficie);
+            border-radius: var(--radio);
+            border: 1px solid var(--borde-suave);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            box-shadow: var(--sombra-tarjeta);
+        }
+
+        .buscador-caja {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .buscador-caja input {
+            width: 100%;
+            padding: 0.65rem 1rem 0.65rem 2.2rem;
+            border: 1px solid #DCD0C0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: #FAF6F0;
+            color: var(--texto-oscuro);
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .buscador-caja input:focus {
+            border-color: var(--acento-dorado);
+            background-color: #FFFFFF;
+        }
+
+        .buscador-caja::before {
+            content: '🔍';
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+
+        .orden-caja {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            color: var(--texto-mutado);
+        }
+
+        .orden-caja select {
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #DCD0C0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--texto-oscuro);
+            background-color: #FFFFFF;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* Cuadrícula de Postres */
+        .grid-postres {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.8rem;
+        }
+
+        .tarjeta-postre {
+            background-color: var(--bg-superficie);
+            border-radius: var(--radio);
+            border: 1px solid var(--borde-suave);
+            overflow: hidden;
+            box-shadow: var(--sombra-tarjeta);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .tarjeta-postre:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(74, 59, 50, 0.1);
+        }
+
+        .tarjeta-header-img {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #FFFFFF;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .badge-categoria {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--texto-oscuro);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            text-shadow: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tarjeta-body {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .tarjeta-body h4 {
+            font-size: 1.15rem;
+            color: var(--texto-oscuro);
+            margin-bottom: 0.35rem;
+        }
+
+        .tarjeta-desc {
+            font-size: 0.85rem;
+            color: var(--texto-mutado);
+            margin-bottom: 0.8rem;
+            flex: 1;
+        }
+
+        .info-rendimiento {
+            font-size: 0.8rem;
+            color: var(--acento-canela);
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tarjeta-precio-fila {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1rem;
+            border-top: 1px dashed var(--borde-suave);
+            padding-top: 0.8rem;
+        }
+
+        .etiqueta-desde {
+            font-size: 0.8rem;
+            color: var(--texto-mutado);
+        }
+
+        .precio-valor {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--acento-canela);
+        }
+
+        .tarjeta-botones {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .btn-personalizar {
+            background-color: var(--primario-rosa);
+            color: #FFFFFF;
+            text-align: center;
+            padding: 0.65rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-personalizar:hover {
+            background-color: var(--primario-hover);
+        }
+
+        .fila-subbotones {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-rapido {
+            background-color: #4A3B32;
+            color: #FFFFFF;
+            border: none;
+            padding: 0.55rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-rapido:hover {
+            background-color: #332822;
+        }
+
+        .btn-detalles {
+            background-color: #F8EFE4;
+            color: var(--texto-oscuro);
+            border: 1px solid var(--borde-suave);
+            padding: 0.55rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-detalles:hover {
+            background-color: #ECDDC7;
+        }
+
+        /* Mensaje de no resultados */
+        .sin-resultados {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: var(--radio);
+            padding: 3rem;
+            text-align: center;
+            color: var(--texto-mutado);
+            border: 1px dashed var(--borde-suave);
+        }
+
+        /* Modal de Ficha Técnica / Ingredientes */
+        .modal-fondo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .modal-fondo.activo {
+            display: flex;
+        }
+
+        .modal-caja {
+            background: var(--bg-superficie);
+            border-radius: var(--radio);
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            border: 1px solid var(--borde-suave);
+            animation: modalFadeIn 0.25s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            background-color: #FAF3E0;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--borde-suave);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            color: var(--texto-oscuro);
+        }
+
+        .btn-cerrar-modal {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--texto-mutado);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .seccion-modal {
+            margin-bottom: 1.2rem;
+        }
+
+        .seccion-modal h5 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--acento-canela);
+            margin-bottom: 0.4rem;
+        }
+
+        .alergenos-badge {
+            background-color: #FDF2F2;
+            color: #C53030;
+            border: 1px solid #FED7D7;
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Notificación Flotante */
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #4A3B32;
+            color: #FFFFFF;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            font-size: 0.95rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 3000;
+        }
+
+        .toast.mostrar {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Pie de página */
+        footer {
+            background-color: #3B2E28;
+            color: #E2D9D2;
+            text-align: center;
+            padding: 1.8rem 1rem;
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 900px) {
+            .contenedor-catalogo {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-filtros {
+                position: static;
+            }
+            .lista-categorias {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .btn-categoria {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navegación -->
+    <header class="navbar">
+        <a href="index.html" class="navbar-brand">CARMIR</a>
+        <nav>
+            <ul class="navbar-nav">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="catalogo.html" class="active">Catálogo</a></li>
+                <li><a href="seguimiento.html">Seguimiento</a></li>
+                <li>
+                    <a href="carrito.html" class="cart-indicator">
+                        🛒 Carrito (<span id="cart-counter">0</span>)
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Contenedor Principal del Catálogo -->
+    <div class="contenedor-catalogo">
+        
+        <!-- Barra Lateral de Categorías (RF-01, RF-09) -->
+        <aside class="sidebar-filtros">
+            <h3>Categorías</h3>
+            <ul class="lista-categorias">
+                <li>
+                    <button class="btn-categoria activo" onclick="filtrarCategoria('todas', this)">
+                        Todos los postres <span class="conteo-cat" id="cnt-todas">7</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="btn-categoria" onclick="filtrarCategoria('Pasteles Clásicos', this)">
+                        Pasteles Clásicos <span class="conteo-cat" id="cnt-pasteles">3</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="btn-categoria" onclick="filtrarCategoria('Gelatinas de Leche', this)">
+                        Gelatinas de Leche <span class="conteo-cat" id="cnt-gel-leche">2</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="btn-categoria" onclick="filtrarCategoria('Gelatinas de Agua', this)">
+                        Gelatinas de Agua <span class="conteo-cat" id="cnt-gel-agua">1</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="btn-categoria" onclick="filtrarCategoria('Postres Individuales', this)">
+                        Postres Individuales <span class="conteo-cat" id="cnt-individuales">1</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="btn-categoria" onclick="filtrarCategoria('Temporada', this)">
+                        Temporada <span class="conteo-cat" id="cnt-temporada">0</span>
+                    </button>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Cuadrícula y Herramientas -->
+        <main class="contenido-productos">
+            
+            <!-- Barra de Búsqueda y Ordenamiento -->
+            <div class="barra-herramientas">
+                <div class="buscador-caja">
+                    <input type="text" id="input-busqueda" placeholder="Buscar por nombre, sabor o ingrediente..." oninput="ejecutarFiltros()">
+                </div>
+                <div class="orden-caja">
+                    <label for="select-orden">Ordenar por:</label>
+                    <select id="select-orden" onchange="ejecutarFiltros()">
+                        <option value="nombre-asc">Nombre (A - Z)</option>
+                        <option value="nombre-desc">Nombre (Z - A)</option>
+                        <option value="precio-asc">Menor precio</option>
+                        <option value="precio-desc">Mayor precio</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grilla Dinámica de Postres -->
+            <div class="grid-postres" id="grid-postres">
+                <!-- Se renderiza dinámicamente con JavaScript -->
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal de Detalles e Ingredientes (RF-10) -->
+    <div id="modal-detalles" class="modal-fondo" onclick="cerrarModalFondo(event)">
+        <div class="modal-caja">
+            <div class="modal-header">
+                <h3 id="modal-titulo">Ficha Técnica del Postre</h3>
+                <button class="btn-cerrar-modal" onclick="cerrarModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="seccion-modal">
+                    <h5>Descripción comercial</h5>
+                    <p id="modal-desc" style="color: var(--texto-mutado); font-size: 0.95rem;"></p>
+                </div>
+                <div class="seccion-modal">
+                    <h5>Rendimiento y porciones sugeridas</h5>
+                    <p id="modal-porciones" style="font-weight: 600; color: var(--texto-oscuro);"></p>
+                </div>
+                <div class="seccion-modal">
+                    <h5>Ingredientes principales</h5>
+                    <p id="modal-ingredientes" style="font-size: 0.9rem; color: var(--texto-mutado);"></p>
+                </div>
+                <div class="seccion-modal">
+                    <h5>Información de Alérgenos</h5>
+                    <div id="modal-alergenos" class="alergenos-badge"></div>
+                </div>
+                <div style="margin-top: 1.5rem; text-align: right;">
+                    <a id="modal-btn-personalizar" href="#" class="btn-personalizar" style="display: inline-block; padding: 0.6rem 1.2rem;">
+                        Personalizar este postre
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de Notificación -->
+    <div id="toast" class="toast">Producto agregado al carrito.</div>
+
+    <!-- Pie de página -->
+    <footer>
+        <p>&copy; 2026 Sistema CARMIR - Desarrollado para Delicias de Postres. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Lógica del Catálogo, Filtrado y Persistencia en XAMPP -->
+    <script>
+        // Catálogo maestro estructurado según el Diccionario de Datos y ERS
+        const CATALOGO_POSTRES = [
+            {
+                id: 1,
+                nombre: "Pastel de Tres Leches",
+                categoria: "Pasteles Clásicos",
+                precioBase: 350.00,
+                tamanoBase: "Chico (10-12 pax)",
+                descripcion: "Clásico bizcocho bañado en la tradicional mezcla de tres leches casera, decorado con durazno en almíbar y trozos de nuez pecana.",
+                porciones: "10 a 12 personas (configurable hasta 200 personas)",
+                ingredientes: "Harina de trigo, leche evaporada, leche condensada, crema de leche, huevo, azúcar refinada, durazno y nuez selecta.",
+                alergenos: "Contiene: Lácteos, Huevo, Gluten y Nuez.",
+                estiloImg: "background: linear-gradient(135deg, #FFF9E6 0%, #F5E5C9 100%); color: #7B6843;"
+            },
+            {
+                id: 2,
+                nombre: "Gelatina de Mosaico",
+                categoria: "Gelatinas de Leche",
+                precioBase: 180.00,
+                tamanoBase: "Grande",
+                descripcion: "Suave y cremosa base de gelatina de tres leches con cubos de sabores frutales (fresa, piña, uva y limón).",
+                porciones: "12 a 15 porciones generosas",
+                ingredientes: "Grenetina natural, leche entera, leche condensada, esencias frutales y azúcar.",
+                alergenos: "Contiene: Lácteos.",
+                estiloImg: "background: linear-gradient(135deg, #E8F0FE 0%, #C7D9FB 100%); color: #435E8B;"
+            },
+            {
+                id: 3,
+                nombre: "Pastel de Chocolate",
+                categoria: "Pasteles Clásicos",
+                precioBase: 380.00,
+                tamanoBase: "Chico (10-12 pax)",
+                descripcion: "Bizcocho húmedo de cocoa natural, doble cubierta de ganache semi-amargo y relleno de compota de fresas naturales.",
+                porciones: "10 a 12 personas",
+                ingredientes: "Harina, cocoa pura en polvo, chocolate semi-amargo, mantequilla pura, huevo, leche entera y fresas frescas.",
+                alergenos: "Contiene: Lácteos, Huevo y Gluten.",
+                estiloImg: "background: linear-gradient(135deg, #4A3525 0%, #2E1F16 100%); color: #F0DFD5;"
+            },
+            {
+                id: 4,
+                nombre: "Gelatina de Rompope",
+                categoria: "Gelatinas de Leche",
+                precioBase: 200.00,
+                tamanoBase: "Grande",
+                descripcion: "Receta tradicional con auténtico rompope de vainilla artesanal y un delicado toque de canela y pasas.",
+                porciones: "12 a 15 porciones",
+                ingredientes: "Rompope artesanal, leche entera, grenetina, canela y pasas maceradas.",
+                alergenos: "Contiene: Lácteos, Huevo y trazas de alcohol natural.",
+                estiloImg: "background: linear-gradient(135deg, #FFF4D0 0%, #F9E29D 100%); color: #8A6D23;"
+            },
+            {
+                id: 5,
+                nombre: "Pastel Imposible (Chocoflan)",
+                categoria: "Pasteles Clásicos",
+                precioBase: 320.00,
+                tamanoBase: "Mediano (15 pax)",
+                descripcion: "La combinación perfecta entre suave flan napolitano de vainilla y esponjoso pastel de chocolate fundido con caramelo líquido.",
+                porciones: "12 a 15 personas",
+                ingredientes: "Leche condensada, leche evaporada, queso crema, huevo, cocoa pura, azúcar para caramelo.",
+                alergenos: "Contiene: Lácteos, Huevo y Gluten.",
+                estiloImg: "background: linear-gradient(to bottom, #4A3525 50%, #FFF3D6 50%); color: #FFFFFF;"
+            },
+            {
+                id: 6,
+                nombre: "Pastel de Fresa Especial",
+                categoria: "Pasteles Clásicos",
+                precioBase: 320.00,
+                tamanoBase: "Chico (10-12 pax)",
+                descripcion: "Bizcocho de vainilla bañado en almíbar ligero de frutas, relleno con crema chantilly y abundantes fresas frescas de temporada.",
+                porciones: "10 a 12 personas",
+                ingredientes: "Harina refinada, crema para batir fresca, fresas frescas, azúcar glas y huevo.",
+                alergenos: "Contiene: Lácteos, Huevo y Gluten.",
+                estiloImg: "background: linear-gradient(135deg, #FFE3E3 0%, #FFCAD4 100%); color: #A64452;"
+            },
+            {
+                id: 7,
+                nombre: "Brownies Clásicos (Caja)",
+                categoria: "Postres Individuales",
+                precioBase: 150.00,
+                tamanoBase: "Caja de 6 piezas",
+                descripcion: "Brownies de textura húmeda y densa con trozos de nuez crujiente y chispas de chocolate derretidas.",
+                porciones: "6 piezas individuales",
+                ingredientes: "Mantequilla sin sal, chocolate amargo, azúcar mascabado, huevo, harina y nuez pecana.",
+                alergenos: "Contiene: Lácteos, Huevo, Gluten y Nuez.",
+                estiloImg: "background: linear-gradient(135deg, #3C2A21 0%, #1A120B 100%); color: #E5D9B6;"
+            }
+        ];
+
+        let categoriaSeleccionada = "todas";
+
+        // Obtener y guardar Carrito en LocalStorage
+        function obtenerCarrito() {
+            return JSON.parse(localStorage.getItem('carmir_carrito')) || [];
+        }
+
+        function guardarCarrito(carrito) {
+            localStorage.setItem('carmir_carrito', JSON.stringify(carrito));
+            actualizarContador();
+        }
+
+        function actualizarContador() {
+            const carrito = obtenerCarrito();
+            const total = carrito.reduce((acc, item) => acc + (item.cantidad || 1), 0);
+            const el = document.getElementById('cart-counter');
+            if (el) el.textContent = total;
+        }
+
+        function mostrarToast(mensaje) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensaje;
+            toast.classList.add('mostrar');
+            setTimeout(() => toast.classList.remove('mostrar'), 2500);
+        }
+
+        // Agregar de forma rápida con configuración base
+        function agregarRapido(id) {
+            const postre = CATALOGO_POSTRES.find(p => p.id === id);
+            if (!postre) return;
+
+            const carrito = obtenerCarrito();
+            const existente = carrito.find(item => item.id === id && item.tamano === postre.tamanoBase);
+
+            if (existente) {
+                existente.cantidad = (existente.cantidad || 1) + 1;
+            } else {
+                carrito.push({
+                    id: postre.id,
+                    nombre: postre.nombre,
+                    precio: postre.precioBase,
+                    tamano: postre.tamanoBase,
+                    relleno: "Estándar / Receta original",
+                    dedicatoria: "",
+                    cantidad: 1
+                });
+            }
+
+            guardarCarrito(carrito);
+            mostrarToast(`"${postre.nombre}" agregado al carrito.`);
+        }
+
+        // Renderizado del catálogo
+        function renderizarCatalogo(postres) {
+            const grid = document.getElementById('grid-postres');
+            grid.innerHTML = '';
+
+            if (postres.length === 0) {
+                grid.innerHTML = `
+                    <div class="sin-resultados">
+                        <h4>No encontramos postres que coincidan con tu búsqueda</h4>
+                        <p style="margin-top: 0.5rem;">Intenta con otra palabra clave o selecciona otra categoría.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            postres.forEach(p => {
+                const tarjeta = document.createElement('article');
+                tarjeta.className = 'tarjeta-postre';
+                tarjeta.innerHTML = `
+                    <div class="tarjeta-header-img" style="${p.estiloImg}">
+                        <span class="badge-categoria">${p.categoria}</span>
+                        ${p.nombre}
+                    </div>
+                    <div class="tarjeta-body">
+                        <h4>${p.nombre}</h4>
+                        <p class="tarjeta-desc">${p.descripcion}</p>
+                        <div class="info-rendimiento">🍰 Rinde: ${p.porciones}</div>
+                        <div class="tarjeta-precio-fila">
+                            <span class="etiqueta-desde">Precio base:</span>
+                            <span class="precio-valor">$${p.precioBase.toFixed(2)} MXN</span>
+                        </div>
+                        <div class="tarjeta-botones">
+                            <a href="personalizar.html?id=${p.id}" class="btn-personalizar">
+                                ✨ Personalizar Pedido
+                            </a>
+                            <div class="fila-subbotones">
+                                <button class="btn-rapido" onclick="agregarRapido(${p.id})">
+                                    + Carrito Rápido
+                                </button>
+                                <button class="btn-detalles" onclick="abrirModal(${p.id})">
+                                    Ingredientes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(tarjeta);
+            });
+        }
+
+        // Lógica de filtrado y ordenamiento combinado
+        function ejecutarFiltros() {
+            const busqueda = document.getElementById('input-busqueda').value.toLowerCase().trim();
+            const orden = document.getElementById('select-orden').value;
+
+            let resultado = CATALOGO_POSTRES.filter(p => {
+                const coincideCat = (categoriaSeleccionada === 'todas') || (p.categoria === categoriaSeleccionada);
+                const coincideTexto = p.nombre.toLowerCase().includes(busqueda) ||
+                                      p.descripcion.toLowerCase().includes(busqueda) ||
+                                      p.ingredientes.toLowerCase().includes(busqueda);
+                return coincideCat && coincideTexto;
+            });
+
+            // Ordenamiento
+            resultado.sort((a, b) => {
+                if (orden === 'nombre-asc') return a.nombre.localeCompare(b.nombre);
+                if (orden === 'nombre-desc') return b.nombre.localeCompare(a.nombre);
+                if (orden === 'precio-asc') return a.precioBase - b.precioBase;
+                if (orden === 'precio-desc') return b.precioBase - a.precioBase;
+                return 0;
+            });
+
+            renderizarCatalogo(resultado);
+        }
+
+        function filtrarCategoria(cat, elementoBtn) {
+            categoriaSeleccionada = cat;
+            document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('activo'));
+            elementoBtn.classList.add('activo');
+            ejecutarFiltros();
+        }
+
+        // Modal de Ficha Técnica (RF-10)
+        function abrirModal(id) {
+            const postre = CATALOGO_POSTRES.find(p => p.id === id);
+            if (!postre) return;
+
+            document.getElementById('modal-titulo').textContent = postre.nombre;
+            document.getElementById('modal-desc').textContent = postre.descripcion;
+            document.getElementById('modal-porciones').textContent = postre.porciones;
+            document.getElementById('modal-ingredientes').textContent = postre.ingredientes;
+            document.getElementById('modal-alergenos').textContent = `⚠️ ${postre.alergenos}`;
+            document.getElementById('modal-btn-personalizar').href = `personalizar.html?id=${postre.id}`;
+
+            document.getElementById('modal-detalles').classList.add('activo');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-detalles').classList.remove('activo');
+        }
+
+        function cerrarModalFondo(e) {
+            if (e.target.id === 'modal-detalles') cerrarModal();
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            actualizarContador();
+            ejecutarFiltros();
+        });
+    </script>
+</body>
+</html>

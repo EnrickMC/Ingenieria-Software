@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARMIR - Acceso a Terminal Administrativa</title>
+    <style>
+        :root {
+            --bg-software: #EEF2F5;
+            --sidebar-fondo: #2C3E50;
+            --header-oscuro: #1A252F;
+            --acento-canela: #D4A373;
+            --acento-dorado: #D29D6A;
+            --verde-exito: #2ECC71;
+            --verde-hover: #27AE60;
+            --rojo-alerta: #E74C3C;
+            --texto-oscuro: #2C3E50;
+            --texto-mutado: #7F8C8D;
+            --borde-suave: #ECF0F1;
+            --fuente-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --radio: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente-base);
+            background-color: var(--bg-software);
+            color: var(--texto-oscuro);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        /* Tarjeta central de Login */
+        .login-card {
+            background-color: #FFFFFF;
+            width: 100%;
+            max-width: 440px;
+            border-radius: var(--radio);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            border: 1px solid #DFE6E9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cabecera estilo Terminal Mostrador */
+        .login-header {
+            background-color: var(--sidebar-fondo);
+            color: #FFFFFF;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 4px solid var(--acento-canela);
+            position: relative;
+        }
+
+        .login-header h1 {
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 0.2rem;
+            color: #FFFFFF;
+        }
+
+        .login-header p {
+            font-size: 0.85rem;
+            color: #BDC3C7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .badge-terminal {
+            display: inline-block;
+            background: rgba(212, 163, 115, 0.25);
+            color: var(--acento-canela);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 0.6rem;
+            border: 1px solid rgba(212, 163, 115, 0.4);
+        }
+
+        /* Selector de Tipo de Usuario (Dueña vs Personal) */
+        .tabs-rol {
+            display: flex;
+            background-color: #F8F9FA;
+            border-bottom: 1px solid var(--borde-suave);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem 0.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--texto-mutado);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.activo {
+            background-color: #FFFFFF;
+            color: var(--sidebar-fondo);
+            border-bottom: 3px solid var(--sidebar-fondo);
+        }
+
+        /* Contenido del Formulario */
+        .login-body {
+            padding: 2rem;
+        }
+
+        .alerta-error {
+            display: none;
+            background-color: #FDEDEC;
+            color: var(--rojo-alerta);
+            border: 1px solid #FADBD8;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .alerta-error.visible {
+            display: block;
+        }
+
+        .grupo-form {
+            margin-bottom: 1.5rem;
+        }
+
+        .grupo-form label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--texto-oscuro);
+            margin-bottom: 0.4rem;
+        }
+
+        .campo-input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1px solid #BDC3C7;
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: #F8F9FA;
+            color: var(--texto-oscuro);
+            outline: none;
+            transition: all 0.2s ease;
+            text-align: center;
+            letter-spacing: 2px;
+            font-family: inherit;
+        }
+
+        .campo-input:focus {
+            border-color: #3498DB;
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+
+        /* Indicador visual de puntos PIN */
+        .pin-display-box {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 1.2rem 0;
+        }
+
+        .pin-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #BDC3C7;
+            background-color: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .pin-dot.marcado {
+            background-color: var(--acento-canela);
+            border-color: var(--acento-canela);
+            transform: scale(1.15);
+        }
+
+        /* Teclado Numérico Virtual para Mostrador */
+        .keypad-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 1.2rem;
+        }
+
+        .btn-tecla {
+            background-color: #F8F9FA;
+            border: 1px solid #DCD0C0;
+            padding: 0.85rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--texto-oscuro);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .btn-tecla:hover {
+            background-color: #EAECEE;
+            transform: translateY(-1px);
+        }
+
+        .btn-tecla:active {
+            background-color: #D5DBDB;
+            transform: translateY(1px);
+        }
+
+        .btn-tecla.accion-borrar {
+            color: var(--rojo-alerta);
+            font-size: 1rem;
+        }
+
+        .btn-tecla.accion-limpiar {
+            color: var(--texto-mutado);
+            font-size: 0.9rem;
+        }
+
+        /* Botón de Entrada Principal */
+        .btn-desbloquear {
+            width: 100%;
+            background-color: var(--verde-exito);
+            color: #FFFFFF;
+            border: none;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-desbloquear:hover {
+            background-color: var(--verde-hover);
+        }
+
+        .btn-desbloquear:disabled {
+            background-color: #BDC3C7;
+            cursor: not-allowed;
+        }
+
+        /* Acceso de regreso a vista de tienda */
+        .link-retorno {
+            display: block;
+            text-align: center;
+            margin-top: 1.2rem;
+            font-size: 0.85rem;
+            color: var(--texto-mutado);
+            text-decoration: none;
+        }
+
+        .link-retorno:hover {
+            text-decoration: underline;
+            color: var(--sidebar-fondo);
+        }
+
+        /* Pie de tarjeta */
+        .login-footer {
+            background-color: #F8F9FA;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--texto-mutado);
+            border-top: 1px solid var(--borde-suave);
+        }
+    </style>
+</head>
+<body>
+
+    <main class="login-card">
+        
+        <!-- Cabecera Terminal -->
+        <header class="login-header">
+            <h1>CARMIR</h1>
+            <p>Plataforma de Administración y Mostrador</p>
+            <span class="badge-terminal">Terminal Local: POS-01</span>
+        </header>
+
+        <!-- Selector de Modo de Acceso (RBAC) -->
+        <div class="tabs-rol">
+            <button type="button" class="tab-btn activo" id="tab-duena" onclick="cambiarModo('duena')">
+                👑 Administradora (Dueña)
+            </button>
+            <button type="button" class="tab-btn" id="tab-personal" onclick="cambiarModo('personal')">
+                👨‍🍳 Personal Auxiliar
+            </button>
+        </div>
+
+        <!-- Cuerpo del Login -->
+        <div class="login-body">
+            
+            <div id="alerta-error" class="alerta-error">
+                PIN incorrecto o sesión no autorizada.
+            </div>
+
+            <!-- MODO DUEÑA (ACCESO POR PIN RÁPIDO) -->
+            <div id="seccion-duena">
+                <div class="grupo-form" style="text-align: center;">
+                    <label>Ingresa tu PIN de Desbloqueo (4 dígitos):</label>
+                    
+                    <!-- Puntos simulados de PIN -->
+                    <div class="pin-display-box">
+                        <div class="pin-dot" id="dot-1"></div>
+                        <div class="pin-dot" id="dot-2"></div>
+                        <div class="pin-dot" id="dot-3"></div>
+                        <div class="pin-dot" id="dot-4"></div>
+                    </div>
+
+                    <!-- Input oculto para compatibilidad con teclado físico -->
+                    <input type="password" id="pin-input" maxlength="4" style="opacity: 0; position: absolute; pointer-events: none;" oninput="sincronizarPinDesdeInput()">
+                </div>
+
+                <!-- Teclado Numérico Virtual para Pantalla Touch / Mostrador -->
+                <div class="keypad-container">
+                    <button type="button" class="btn-tecla" onclick="presionarTecla('1')">1</button>
+                    <button type="button" class="btn-tecla" onclick="presionarTecla('2')">2</button>
+                    <button type="button" class="btn-tecla" onclick="presionarTecla('3')">3</button>
+                    <button type="button" class="btn-tecla" onclick="presionarTecla('4')">4</button>
+                    <button type="button" class="btn-tecla" onclick="presionarTecla('5')">5</button>
+                    <button type="button" class="btn-tecla" onclick="presionarTecla('6')">6</button>
+                    <button type="button" class="btn-tecla" onclick="presionarTecla('7')">7</button>
+                    <button type="button" class="btn-tecla" onclick="presionarTecla('8')">8</button>
+                    <button type="button" class="btn-tecla" onclick="presionarTecla('9')">9</button>
+                    <button type="button" class="btn-tecla accion-limpiar" onclick="limpiarPin()">C</button>
+                    <button type="button" class="btn-tecla" onclick="presionarTecla('0')">0</button>
+                    <button type="button" class="btn-tecla accion-borrar" onclick="borrarUltimoDigito()">⌫</button>
+                </div>
+            </div>
+
+            <!-- MODO PERSONAL (USUARIO + CLAVE) -->
+            <div id="seccion-personal" style="display: none;">
+                <div class="grupo-form">
+                    <label for="txt-personal-usuario">Usuario del Colaborador:</label>
+                    <input type="text" id="txt-personal-usuario" class="campo-input" placeholder="ej. mostrador01" style="text-align: left; letter-spacing: normal;">
+                </div>
+
+                <div class="grupo-form">
+                    <label for="txt-personal-pass">Contraseña / PIN Personal:</label>
+                    <input type="password" id="txt-personal-pass" class="campo-input" placeholder="••••••••">
+                </div>
+            </div>
+
+            <!-- Botón de Entrar -->
+            <button type="button" id="btn-ingresar" class="btn-desbloquear" onclick="ejecutarAutenticacion()">
+                🔓 Desbloquear Sistema
+            </button>
+
+            <a href="index.html" class="link-retorno">← Ir a la Tienda Pública</a>
+        </div>
+
+        <!-- Pie de página -->
+        <footer class="login-footer">
+            Delicias de Postres &copy; 2026 | Arquitectura Híbrida AWS & Local
+        </footer>
+
+    </main>
+
+    <!-- Lógica de Control de Sesión, Roles y Permisos (Singleton) -->
+    <script>
+        let rolActivo = 'duena'; // 'duena' o 'personal'
+        let pinActual = "";
+
+        // Credenciales predefinidas de demostración según ERS
+        const CREDENCIALES_SISTEMA = {
+            duena: {
+                pin: "2026", // PIN de 4 dígitos para Ma. del Carmen Vázquez Pérez
+                nombre: "Ma. del Carmen Vázquez",
+                rol: "Administradora",
+                permisos: ["dashboard", "pedidos", "agenda", "inventario", "recetas", "reportes_financieros", "usuarios"]
+            },
+            personal: [
+                {
+                    usuario: "cocina",
+                    pass: "1234",
+                    nombre: "Personal de Cocina",
+                    rol: "Personal",
+                    permisos: ["pedidos", "agenda", "recetas_consulta", "inventario_merma"] // Sin acceso a reportes financieros ni costos
+                },
+                {
+                    usuario: "mostrador",
+                    pass: "4321",
+                    nombre: "Atención al Cliente",
+                    rol: "Personal",
+                    permisos: ["dashboard", "pedidos", "agenda"] // Sin acceso a inventario general ni reportes financieros
+                }
+            ]
+        };
+
+        function cambiarModo(modo) {
+            rolActivo = modo;
+            ocultarError();
+            limpiarPin();
+
+            const tabDuena = document.getElementById('tab-duena');
+            const tabPersonal = document.getElementById('tab-personal');
+            const secDuena = document.getElementById('seccion-duena');
+            const secPersonal = document.getElementById('seccion-personal');
+
+            if (modo === 'duena') {
+                tabDuena.classList.add('activo');
+                tabPersonal.classList.remove('activo');
+                secDuena.style.display = 'block';
+                secPersonal.style.display = 'none';
+                enfocarPinInput();
+            } else {
+                tabDuena.classList.remove('activo');
+                tabPersonal.classList.add('activo');
+                secDuena.style.display = 'none';
+                secPersonal.style.display = 'block';
+                document.getElementById('txt-personal-usuario').focus();
+            }
+        }
+
+        // Manejo del Teclado Numérico y Puntos PIN
+        function presionarTecla(digito) {
+            if (pinActual.length < 4) {
+                pinActual += digito;
+                actualizarPuntosPin();
+                if (pinActual.length === 4) {
+                    setTimeout(ejecutarAutenticacion, 200); // Auto-login al colocar 4 dígitos
+                }
+            }
+        }
+
+        function borrarUltimoDigito() {
+            if (pinActual.length > 0) {
+                pinActual = pinActual.slice(0, -1);
+                actualizarPuntosPin();
+            }
+        }
+
+        function limpiarPin() {
+            pinActual = "";
+            actualizarPuntosPin();
+            const inputOculto = document.getElementById('pin-input');
+            if (inputOculto) inputOculto.value = "";
+        }
+
+        function actualizarPuntosPin() {
+            for (let i = 1; i <= 4; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (i <= pinActual.length) {
+                    dot.classList.add('marcado');
+                } else {
+                    dot.classList.remove('marcado');
+                }
+            }
+        }
+
+        function sincronizarPinDesdeInput() {
+            const val = document.getElementById('pin-input').value.replace(/[^0-9]/g, '');
+            pinActual = val.slice(0, 4);
+            document.getElementById('pin-input').value = pinActual;
+            actualizarPuntosPin();
+            if (pinActual.length === 4) {
+                setTimeout(ejecutarAutenticacion, 200);
+            }
+        }
+
+        function enfocarPinInput() {
+            const inputOculto = document.getElementById('pin-input');
+            if (inputOculto && rolActivo === 'duena') {
+                inputOculto.focus();
+            }
+        }
+
+        function mostrarError(mensaje) {
+            const alerta = document.getElementById('alerta-error');
+            alerta.textContent = mensaje;
+            alerta.classList.add('visible');
+        }
+
+        function ocultarError() {
+            document.getElementById('alerta-error').classList.remove('visible');
+        }
+
+        // Validación y Persistencia de Sesión Activa (Patrón Singleton)
+        function ejecutarAutenticacion() {
+            ocultarError();
+
+            if (rolActivo === 'duena') {
+                if (pinActual === CREDENCIALES_SISTEMA.duena.pin) {
+                    iniciarSesion(CREDENCIALES_SISTEMA.duena);
+                } else {
+                    mostrarError("PIN incorrecto. (PIN de prueba: 2026)");
+                    limpiarPin();
+                    enfocarPinInput();
+                }
+            } else {
+                const u = document.getElementById('txt-personal-usuario').value.trim().toLowerCase();
+                const p = document.getElementById('txt-personal-pass').value.trim();
+
+                const usuarioValido = CREDENCIALES_SISTEMA.personal.find(colab => colab.usuario === u && colab.pass === p);
+
+                if (usuarioValido) {
+                    iniciarSesion(usuarioValido);
+                } else {
+                    mostrarError("Usuario o contraseña no reconocidos. (Ej. usuario: mostrador, pass: 4321)");
+                }
+            }
+        }
+
+        function iniciarSesion(datosUsuario) {
+            const sesion = {
+                usuario: datosUsuario.usuario || "ADMIN_DUEÑA",
+                nombre: datosUsuario.nombre,
+                rol: datosUsuario.rol,
+                permisos: datosUsuario.permisos,
+                horaInicio: new Date().toISOString()
+            };
+
+            // Guardar en almacenamiento de sesión para que persista durante la jornada de trabajo
+            localStorage.setItem('carmir_sesion_activa', JSON.stringify(sesion));
+
+            // Redirección inmediata al Dashboard Principal
+            window.location.href = "admin-dashboard.html";
+        }
+
+        // Permitir teclado numérico físico directo en la ventana
+        document.addEventListener('keydown', (e) => {
+            if (rolActivo === 'duena') {
+                if (e.key >= '0' && e.key <= '9') {
+                    presionarTecla(e.key);
+                } else if (e.key === 'Backspace') {
+                    borrarUltimoDigito();
+                } else if (e.key === 'Escape' || e.key === 'c' || e.key === 'C') {
+                    limpiarPin();
+                } else if (e.key === 'Enter') {
+                    ejecutarAutenticacion();
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Si ya hay una sesión activa, verificar redirección directa
+            const sesionExistente = JSON.parse(localStorage.getItem('carmir_sesion_activa'));
+            if (sesionExistente) {
+                // Si existe sesión previa podemos permitir saltar o mantenerla
+            }
+            enfocarPinInput();
+        });
+    </script>
+</body>
+</html>

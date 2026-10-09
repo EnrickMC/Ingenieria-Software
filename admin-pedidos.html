@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARMIR Admin - Gestión de Pedidos y Producción</title>
+    <style>
+        :root {
+            --bg-software: #EEF2F5;
+            --sidebar-fondo: #2C3E50;
+            --sidebar-header: #1A252F;
+            --sidebar-hover: #34495E;
+            --acento-canela: #D4A373;
+            --acento-dorado: #D29D6A;
+            --verde-exito: #2ECC71;
+            --verde-hover: #27AE60;
+            --azul-link: #3498DB;
+            --azul-hover: #2980B9;
+            --rojo-alerta: #E74C3C;
+            --rojo-hover: #C0392B;
+            --amarillo-aviso: #F39C12;
+            --texto-oscuro: #2C3E50;
+            --texto-mutado: #7F8C8D;
+            --borde-suave: #ECF0F1;
+            --fuente-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --radio: 8px;
+            --sombra-card: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente-base);
+            background-color: var(--bg-software);
+            color: var(--texto-oscuro);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* BARRA LATERAL (SIDEBAR) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-fondo);
+            color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1.2rem;
+            background-color: var(--sidebar-header);
+            text-align: center;
+            border-bottom: 1px solid var(--sidebar-hover);
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            color: var(--acento-canela);
+            letter-spacing: 1.5px;
+        }
+
+        .sidebar-header p {
+            margin: 4px 0 0;
+            font-size: 0.75rem;
+            color: #BDC3C7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-navegacion {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-navegacion li {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-navegacion a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #ECF0F1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .menu-navegacion a:hover,
+        .menu-navegacion a.activo {
+            background-color: var(--sidebar-hover);
+            border-left: 4px solid var(--acento-canela);
+            color: #FFFFFF;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            background-color: var(--sidebar-header);
+            border-top: 1px solid var(--sidebar-hover);
+        }
+
+        .btn-cerrar-sesion {
+            width: 100%;
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #E74C3C;
+            border: 1px solid #E74C3C;
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cerrar-sesion:hover {
+            background-color: #E74C3C;
+            color: #FFFFFF;
+        }
+
+        /* ÁREA DE CONTENIDO */
+        .contenido-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            background-color: #FFFFFF;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .topbar h1 {
+            font-size: 1.45rem;
+            color: var(--texto-oscuro);
+        }
+
+        .usuario-badge {
+            background-color: #FAF3E0;
+            border: 1px solid #F0E2D0;
+            color: var(--texto-oscuro);
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* CONTENEDOR MASTER-DETAIL */
+        .workspace-pedidos {
+            display: flex;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            height: calc(100vh - 75px);
+            overflow: hidden;
+        }
+
+        /* PANEL IZQUIERDO: LISTA DE PEDIDOS (MASTER) */
+        .columna-master {
+            width: 380px;
+            background: #FFFFFF;
+            border-radius: var(--radio);
+            box-shadow: var(--sombra-card);
+            border: 1px solid var(--borde-suave);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .master-header {
+            padding: 1rem;
+            background-color: #F8F9FA;
+            border-bottom: 1px solid var(--borde-suave);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .master-filtros {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .btn-filtro {
+            background: #FFFFFF;
+            border: 1px solid #DCD0C0;
+            border-radius: 15px;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--texto-mutado);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .btn-filtro.activo {
+            background-color: var(--sidebar-fondo);
+            color: #FFFFFF;
+            border-color: var(--sidebar-fondo);
+        }
+
+        .buscador-pedidos input {
+            width: 100%;
+            padding: 0.65rem 0.8rem;
+            border: 1px solid #BDC3C7;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            background-color: #FAF6F0;
+        }
+
+        .buscador-pedidos input:focus {
+            background-color: #FFFFFF;
+            border-color: var(--azul-link);
+        }
+
+        .lista-scroll-pedidos {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .tarjeta-item-pedido {
+            padding: 1rem;
+            border-bottom: 1px solid var(--borde-suave);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .tarjeta-item-pedido:hover {
+            background-color: #F8FAFC;
+        }
+
+        .tarjeta-item-pedido.seleccionado {
+            background-color: #EBF5FB;
+            border-left: 4px solid var(--azul-link);
+        }
+
+        .item-pedido-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.4rem;
+        }
+
+        .item-pedido-top strong {
+            font-size: 0.95rem;
+            color: var(--texto-oscuro);
+        }
+
+        .item-pedido-cliente {
+            font-size: 0.88rem;
+            color: var(--texto-oscuro);
+            font-weight: 500;
+        }
+
+        .item-pedido-info {
+            font-size: 0.78rem;
+            color: var(--texto-mutado);
+            margin-top: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* BADGES */
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .bg-pendiente { background-color: #FFF3CD; color: #856404; }
+        .bg-aprobado { background-color: #D1ECF1; color: #0C5460; }
+        .bg-preparacion { background-color: #CCE5FF; color: #004085; }
+        .bg-listo { background-color: #D4EDDA; color: #155724; }
+        .bg-entregado { background-color: #E2E3E5; color: #383D41; }
+        .bg-cancelado { background-color: #F8D7DA; color: #721C24; }
+
+        /* PANEL DERECHO: DETALLE DEL PEDIDO (DETAIL) */
+        .columna-detail {
+            flex: 1;
+            background: #FFFFFF;
+            border-radius: var(--radio);
+            box-shadow: var(--sombra-card);
+            border: 1px solid var(--borde-suave);
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--borde-suave);
+            padding-bottom: 1.2rem;
+        }
+
+        .detail-folio {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--texto-oscuro);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-meta {
+            font-size: 0.85rem;
+            color: var(--texto-mutado);
+            text-align: right;
+        }
+
+        /* Cuadro de Advertencia / Bloqueo RF-27 */
+        .alerta-bloqueo-pago {
+            display: none;
+            background-color: #FDEDEC;
+            border-left: 4px solid var(--rojo-alerta);
+            padding: 1rem 1.2rem;
+            border-radius: 4px;
+            color: #C0392B;
+            font-size: 0.9rem;
+        }
+
+        .alerta-bloqueo-pago.activo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Secciones informativas */
+        .grid-info-pedido {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        .caja-bloque {
+            background-color: #F8F9FA;
+            border: 1px solid var(--borde-suave);
+            border-radius: 6px;
+            padding: 1.2rem;
+            font-size: 0.88rem;
+        }
+
+        .caja-bloque h4 {
+            color: var(--acento-canela);
+            font-size: 0.95rem;
+            margin-bottom: 0.8rem;
+            border-bottom: 1px dashed var(--borde-suave);
+            padding-bottom: 0.35rem;
+        }
+
+        .caja-bloque p {
+            margin-bottom: 0.4rem;
+        }
+
+        /* Tabla de postres y recetas */
+        .tabla-productos-detalle {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .tabla-productos-detalle th,
+        .tabla-productos-detalle td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--borde-suave);
+        }
+
+        .tabla-productos-detalle th {
+            background-color: #F8F9FA;
+            color: var(--texto-mutado);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .sub-specs-receta {
+            font-size: 0.8rem;
+            color: var(--rojo-alerta);
+            margin-top: 0.3rem;
+            line-height: 1.4;
+        }
+
+        /* Panel Financiero */
+        .panel-financiero-box {
+            background-color: #FAF6F0;
+            border: 1px solid var(--borde-suave);
+            border-radius: 6px;
+            padding: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .bal-indicador span {
+            font-size: 0.78rem;
+            color: var(--texto-mutado);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .bal-indicador strong {
+            display: block;
+            font-size: 1.3rem;
+            color: var(--texto-oscuro);
+            margin-top: 0.2rem;
+        }
+
+        /* Barra de Acciones del Workflow */
+        .workflow-footer {
+            margin-top: auto;
+            border-top: 2px solid var(--borde-suave);
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .acciones-secundarias {
+            display: flex;
+            gap: 8px;
+        }
+
+        .acciones-principales {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 0.65rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-imprimir { background-color: #7F8C8D; color: #FFFFFF; }
+        .btn-imprimir:hover { background-color: #6C7A7D; }
+
+        .btn-cancelar { background-color: #FFFFFF; color: var(--rojo-alerta); border: 1px solid var(--rojo-alerta); }
+        .btn-cancelar:hover { background-color: #FDEDEC; }
+
+        .btn-pago { background-color: var(--amarillo-aviso); color: #FFFFFF; }
+        .btn-pago:hover { background-color: #D68910; }
+
+        .btn-avanzar { background-color: var(--azul-link); color: #FFFFFF; }
+        .btn-avanzar:hover { background-color: var(--azul-hover); }
+
+        .btn-avanzar:disabled {
+            background-color: #BDC3C7;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-wa { background-color: var(--verde-exito); color: #FFFFFF; text-decoration: none; }
+        .btn-wa:hover { background-color: var(--verde-hover); }
+
+        /* MODALES */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.activo { display: flex; }
+
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: var(--radio);
+            width: 100%;
+            max-width: 440px;
+            padding: 1.8rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-card h3 {
+            margin-bottom: 0.8rem;
+            color: var(--texto-oscuro);
+        }
+
+        .modal-card input,
+        .modal-card textarea,
+        .modal-card select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #BDC3C7;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .modal-acciones {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* FORMATO IMPRESIÓN (TICKET DE COCINA) */
+        @media print {
+            body {
+                background: #FFFFFF;
+                color: #000000;
+                display: block;
+                height: auto;
+                overflow: visible;
+            }
+
+            .sidebar, .topbar, .columna-master, .workflow-footer, .alerta-bloqueo-pago, .btn-pago {
+                display: none !important;
+            }
+
+            .workspace-pedidos {
+                padding: 0;
+                height: auto;
+            }
+
+            .columna-detail {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                width: 100%;
+            }
+
+            .print-ticket-encabezado {
+                display: block !important;
+                text-align: center;
+                border-bottom: 2px dashed #000;
+                padding-bottom: 10px;
+                margin-bottom: 15px;
+            }
+        }
+
+        .print-ticket-encabezado { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- MENÚ LATERAL -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>CARMIR ADMIN</h2>
+            <p>Delicias de Postres</p>
+        </div>
+
+        <ul class="menu-navegacion">
+            <li><a href="admin-dashboard.html">📊 Dashboard Principal</a></li>
+            <li><a href="admin-pedidos.html" class="activo">📝 Gestión de Pedidos</a></li>
+            <li><a href="admin-agenda.html">📅 Agenda de Producción</a></li>
+            <li id="nav-inventario"><a href="admin-inventario.html">📦 Control de Inventario</a></li>
+            <li id="nav-recetas"><a href="admin-recetas.html">🍰 Catálogo y Recetas</a></li>
+            <li id="nav-reportes"><a href="admin-reportes.html">📈 Reportes Financieros</a></li>
+            <li id="nav-usuarios"><a href="admin-usuarios.html">👥 Personal y Permisos</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button type="button" class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                🔒 Bloquear / Salir
+            </button>
+        </div>
+    </aside>
+
+    <!-- ÁREA DE CONTENIDO -->
+    <main class="contenido-area">
+        
+        <header class="topbar">
+            <h1>Gestión de Pedidos y Línea de Producción</h1>
+            <div class="usuario-badge" id="sesion-usuario-display">Admin: Cargando...</div>
+        </header>
+
+        <div class="workspace-pedidos">
+            
+            <!-- MASTER: LISTADO DE PEDIDOS -->
+            <section class="columna-master">
+                <div class="master-header">
+                    <!-- Filtros por Estado (RF-23) -->
+                    <div class="master-filtros">
+                        <button class="btn-filtro activo" onclick="filtrarPorEstado('Todos', this)">Todos</button>
+                        <button class="btn-filtro" onclick="filtrarPorEstado('Pendiente', this)">Pendientes</button>
+                        <button class="btn-filtro" onclick="filtrarPorEstado('En preparación', this)">En Prep.</button>
+                        <button class="btn-filtro" onclick="filtrarPorEstado('Listo', this)">Listos</button>
+                        <button class="btn-filtro" onclick="filtrarPorEstado('Entregado', this)">Entregados</button>
+                        <button class="btn-filtro" onclick="filtrarPorEstado('Cancelado', this)">Cancelados</button>
+                    </div>
+
+                    <!-- Buscador -->
+                    <div class="buscador-pedidos">
+                        <input type="text" id="input-busqueda-pedidos" placeholder="Buscar por cliente o folio..." oninput="filtrarListaPedidos()">
+                    </div>
+                </div>
+
+                <div class="lista-scroll-pedidos" id="contenedor-lista-pedidos">
+                    <!-- Inyección dinámica -->
+                </div>
+            </section>
+
+            <!-- DETAIL: FICHA DEL PEDIDO SELECCIONADO -->
+            <section class="columna-detail" id="panel-detalle-pedido">
+                
+                <!-- Encabezado exclusivo de comanda para impresión física -->
+                <div class="print-ticket-encabezado">
+                    <h2>CARMIR - REPOSTERÍA FINA</h2>
+                    <p>*** COMANDA / TICKET DE PRODUCCIÓN ***</p>
+                </div>
+
+                <!-- Cabecera Normal -->
+                <div class="detail-header">
+                    <div>
+                        <div class="detail-folio">
+                            <span id="dtl-folio">#FOL-0000</span>
+                            <span id="dtl-badge" class="badge bg-pendiente">Pendiente</span>
+                        </div>
+                        <span style="font-size: 0.85rem; color: var(--texto-mutado);">Origen: <span id="dtl-origen">Web</span></span>
+                    </div>
+
+                    <div class="detail-meta">
+                        <div>Ingreso: <strong id="dtl-fecha-ingreso">-</strong></div>
+                        <div>Entrega esperada: <strong id="dtl-fecha-entrega" style="color: var(--rojo-alerta);">-</strong></div>
+                    </div>
+                </div>
+
+                <!-- ALERTA DE BLOQUEO DE PREPARACIÓN (RF-27) -->
+                <div id="alerta-bloqueo" class="alerta-bloqueo-pago">
+                    <span style="font-size: 1.4rem;">⛔</span>
+                    <div>
+                        <strong>Producción Bloqueada por Política Financiera:</strong><br>
+                        Este pedido no cuenta con pago o anticipo mínimo confirmado. Valida el comprobante bancario antes de autorizar el pase a cocina.
+                    </div>
+                </div>
+
+                <!-- Datos del Cliente y Logística -->
+                <div class="grid-info-pedido">
+                    <div class="caja-bloque">
+                        <h4>Datos del Cliente</h4>
+                        <p><strong>Nombre:</strong> <span id="dtl-cliente-nombre">-</span></p>
+                        <p><strong>Teléfono:</strong> <span id="dtl-cliente-telefono">-</span></p>
+                        <p><strong>Correo:</strong> <span id="dtl-cliente-correo">-</span></p>
+                    </div>
+
+                    <div class="caja-bloque">
+                        <h4>Logística de Entrega</h4>
+                        <p><strong>Modalidad:</strong> <span id="dtl-entrega-modalidad">-</span></p>
+                        <p><strong>Ubicación:</strong> <span id="dtl-entrega-direccion">-</span></p>
+                        <p><strong>Notas:</strong> <span id="dtl-entrega-notas">-</span></p>
+                    </div>
+                </div>
+
+                <!-- Desglose de Postres y Capas Decoradoras -->
+                <div>
+                    <h4 style="color: var(--texto-oscuro); margin-bottom: 0.5rem;">Fórmula y Especificaciones de Postres</h4>
+                    <table class="tabla-productos-detalle">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">Cant.</th>
+                                <th>Producto / Postre Configurado</th>
+                                <th style="width: 100px;">P. Unit.</th>
+                                <th style="width: 100px;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dtl-tabla-productos">
+                            <!-- Productos inyectados dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Panel Financiero y Control de Saldos (RF-25, RF-26) -->
+                <div class="panel-financiero-box">
+                    <div class="bal-indicador">
+                        <span>Método Acordado</span>
+                        <strong id="dtl-pago-metodo">Efectivo</strong>
+                    </div>
+
+                    <div class="bal-indicador">
+                        <span>Monto Total</span>
+                        <strong id="dtl-pago-total">$0.00</strong>
+                    </div>
+
+                    <div class="bal-indicador">
+                        <span>Anticipo Cubierto</span>
+                        <strong id="dtl-pago-cubierto" style="color: var(--verde-exito);">$0.00</strong>
+                    </div>
+
+                    <div class="bal-indicador">
+                        <span>Saldo Pendiente</span>
+                        <strong id="dtl-pago-saldo" style="color: var(--rojo-alerta);">$0.00</strong>
+                    </div>
+
+                    <div class="bal-indicador">
+                        <span>Estado de Cobro</span>
+                        <strong id="dtl-pago-estado" style="font-size: 0.95rem;">-</strong>
+                    </div>
+
+                    <button type="button" class="btn btn-pago" onclick="abrirModalValidarPago()">
+                        💳 Registrar / Validar Pago
+                    </button>
+                </div>
+
+                <!-- Botones del Ciclo Operativo (Workflow) -->
+                <div class="workflow-footer">
+                    <div class="acciones-secundarias">
+                        <button type="button" class="btn btn-imprimir" onclick="imprimirTicket()">
+                            🖨️ Ticket de Cocina
+                        </button>
+                        <button type="button" class="btn btn-cancelar" onclick="abrirModalCancelar()">
+                            ✕ Anular Pedido
+                        </button>
+                    </div>
+
+                    <div class="acciones-principales">
+                        <a id="dtl-btn-wa" href="#" target="_blank" class="btn btn-wa">
+                            💬 WhatsApp Cliente
+                        </a>
+                        <button type="button" id="btn-avanzar-fase" class="btn btn-avanzar" onclick="avanzarEstadoOperativo()">
+                            Aprobar y Pasar a "En Preparación" →
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- MODAL PARA VALIDAR PAGO / ANTICIPO (RF-25, RF-26) -->
+    <div id="modal-pago" class="modal-overlay">
+        <div class="modal-card">
+            <h3>Validación Financiera de Pedido</h3>
+            <p style="font-size: 0.85rem; color: var(--texto-mutado); margin-bottom: 1rem;">
+                Registra la recepción del anticipo o liquidación completa para desbloquear la producción en cocina.
+            </p>
+
+            <label style="font-size: 0.85rem; font-weight: 600;">Monto a Abonar (MXN):</label>
+            <input type="number" id="modal-input-abono" step="0.50" min="0" placeholder="0.00">
+
+            <label style="font-size: 0.85rem; font-weight: 600;">Forma de Verificación:</label>
+            <select id="modal-select-forma-pago">
+                <option value="Transferencia Bancaria (SPEI Confirmado)">Transferencia Bancaria (SPEI Confirmado)</option>
+                <option value="Efectivo en Mostrador">Efectivo en Mostrador</option>
+                <option value="Terminal Tarjeta Débito/Crédito">Terminal Tarjeta Débito/Crédito</option>
+            </select>
+
+            <div class="modal-acciones">
+                <button type="button" class="btn btn-cancelar" onclick="cerrarModalPago()">Cancelar</button>
+                <button type="button" class="btn btn-avanzar" onclick="guardarValidacionPago()">Guardar y Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CANCELACIÓN JUSTIFICADA (RF-24) -->
+    <div id="modal-cancelar" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="color: var(--rojo-alerta);">Anular / Cancelar Pedido</h3>
+            <p style="font-size: 0.85rem; color: var(--texto-mutado);">
+                Indica el motivo de la cancelación. Este texto quedará registrado en la trazabilidad y será visible para el cliente.
+            </p>
+
+            <label style="font-size: 0.85rem; font-weight: 600;">Motivo de Cancelación: *</label>
+            <textarea id="modal-txt-motivo-cancelacion" placeholder="Ej. Falta de insumos especiales, cliente declinó compra, falta de confirmación de pago..."></textarea>
+
+            <div class="modal-acciones">
+                <button type="button" class="btn btn-imprimir" onclick="cerrarModalCancelar()">Volver</button>
+                <button type="button" class="btn" style="background-color: var(--rojo-alerta); color:#fff;" onclick="confirmarCancelacionPedido()">Confirmar Anulación</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LÓGICA DE CONTROL, ESTADOS Y PATRONES -->
+    <script>
+        let pedidosLocales = [];
+        let pedidoSeleccionadoActual = null;
+        let filtroEstadoActual = 'Todos';
+
+        // Validar Sesión Singleton y Permisos
+        function validarSesion() {
+            const sesion = JSON.parse(localStorage.getItem('carmir_sesion_activa'));
+            if (!sesion) {
+                window.location.href = "admin-login.html";
+                return;
+            }
+
+            document.getElementById('sesion-usuario-display').textContent = `${sesion.rol}: ${sesion.nombre}`;
+
+            const permisos = sesion.permisos || [];
+            if (!permisos.includes('reportes_financieros')) {
+                const navRep = document.getElementById('nav-reportes');
+                if (navRep) navRep.style.display = 'none';
+            }
+            if (!permisos.includes('inventario') && !permisos.includes('inventario_merma')) {
+                const navInv = document.getElementById('nav-inventario');
+                if (navInv) navInv.style.display = 'none';
+            }
+            if (!permisos.includes('recetas') && !permisos.includes('recetas_consulta')) {
+                const navRec = document.getElementById('nav-recetas');
+                if (navRec) navRec.style.display = 'none';
+            }
+            if (!permisos.includes('usuarios')) {
+                const navUsr = document.getElementById('nav-usuarios');
+                if (navUsr) navUsr.style.display = 'none';
+            }
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('carmir_sesion_activa');
+            window.location.href = "admin-login.html";
+        }
+
+        // Cargar pedidos de LocalStorage
+        function cargarPedidos() {
+            pedidosLocales = JSON.parse(localStorage.getItem('carmir_pedidos')) || [];
+            renderizarListaPedidos();
+
+            // Si hay un folio en URL (?folio=...), seleccionarlo prioritariamente
+            const urlParams = new URLSearchParams(window.location.search);
+            const folioParam = urlParams.get('folio');
+            if (folioParam) {
+                const match = pedidosLocales.find(p => p.folio === folioParam);
+                if (match) {
+                    seleccionarPedido(match);
+                    return;
+                }
+            }
+
+            if (pedidosLocales.length > 0 && !pedidoSeleccionadoActual) {
+                seleccionarPedido(pedidosLocales[0]);
+            }
+        }
+
+        // Renderizado del Master (Lista Izquierda)
+        function renderizarListaPedidos() {
+            const contenedor = document.getElementById('contenedor-lista-pedidos');
+            const busqueda = document.getElementById('input-busqueda-pedidos').value.toLowerCase().trim();
+
+            contenedor.innerHTML = '';
+
+            const filtrados = pedidosLocales.filter(p => {
+                const coincideEstado = (filtroEstadoActual === 'Todos') || (p.estado.toLowerCase() === filtroEstadoActual.toLowerCase());
+                const coincideBusqueda = p.folio.toLowerCase().includes(busqueda) || p.cliente.nombre.toLowerCase().includes(busqueda);
+                return coincideEstado && coincideBusqueda;
+            });
+
+            if (filtrados.length === 0) {
+                contenedor.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--texto-mutado); font-size: 0.85rem;">No hay pedidos con estos filtros.</div>`;
+                return;
+            }
+
+            filtrados.forEach(p => {
+                const div = document.createElement('div');
+                const esActivo = pedidoSeleccionadoActual && pedidoSeleccionadoActual.folio === p.folio;
+                div.className = `tarjeta-item-pedido ${esActivo ? 'seleccionado' : ''}`;
+                div.onclick = () => seleccionarPedido(p);
+
+                let claseBadge = 'bg-pendiente';
+                const e = p.estado.toLowerCase();
+                if (e.includes('aprob')) claseBadge = 'bg-aprobado';
+                else if (e.includes('prep')) claseBadge = 'bg-preparacion';
+                else if (e.includes('listo')) claseBadge = 'bg-listo';
+                else if (e.includes('entreg')) claseBadge = 'bg-entregado';
+                else if (e.includes('cancel')) claseBadge = 'bg-cancelado';
+
+                const totalArticulos = p.productos.reduce((acc, it) => acc + (it.cantidad || 1), 0);
+
+                div.innerHTML = `
+                    <div class="item-pedido-top">
+                        <strong>${p.folio}</strong>
+                        <span class="badge ${claseBadge}">${p.estado}</span>
+                    </div>
+                    <div class="item-pedido-cliente">${p.cliente.nombre}</div>
+                    <div class="item-pedido-info">
+                        <span>${totalArticulos} postre(s) | $${p.pago.montoTotal.toFixed(2)}</span>
+                        <span>${p.entrega.modalidad}</span>
+                    </div>
+                `;
+                contenedor.appendChild(div);
+            });
+        }
+
+        // Selección e Inspección Técnica del Detalle (Right Detail)
+        function seleccionarPedido(pedido) {
+            pedidoSeleccionadoActual = pedido;
+            renderizarListaPedidos();
+
+            document.getElementById('dtl-folio').textContent = pedido.folio;
+            
+            // Badge de Estado
+            const badge = document.getElementById('dtl-badge');
+            badge.className = 'badge';
+            const e = pedido.estado.toLowerCase();
+            badge.textContent = pedido.estado;
+            if (e.includes('aprob')) badge.classList.add('bg-aprobado');
+            else if (e.includes('prep')) badge.classList.add('bg-preparacion');
+            else if (e.includes('listo')) badge.classList.add('bg-listo');
+            else if (e.includes('entreg')) badge.classList.add('bg-entregado');
+            else if (e.includes('cancel')) badge.classList.add('bg-cancelado');
+            else badge.classList.add('bg-pendiente');
+
+            document.getElementById('dtl-origen').textContent = "Portal Web";
+            document.getElementById('dtl-fecha-ingreso').textContent = new Date(pedido.fechaCreacion).toLocaleString();
+            document.getElementById('dtl-fecha-entrega').textContent = pedido.entrega.fechaHoraEsperada.replace('T', ' ');
+
+            // Cliente
+            document.getElementById('dtl-cliente-nombre').textContent = pedido.cliente.nombre;
+            document.getElementById('dtl-cliente-telefono').textContent = pedido.cliente.telefono;
+            document.getElementById('dtl-cliente-correo').textContent = pedido.cliente.correo;
+
+            // Entrega
+            document.getElementById('dtl-entrega-modalidad').textContent = pedido.entrega.modalidad;
+            if (pedido.entrega.direccion) {
+                const d = pedido.entrega.direccion;
+                document.getElementById('dtl-entrega-direccion').textContent = `${d.calle} #${d.numeroExterior}, Col. ${d.colonia}`;
+            } else {
+                document.getElementById('dtl-entrega-direccion').textContent = "Recolección en Mostrador";
+            }
+            document.getElementById('dtl-entrega-notas').textContent = pedido.entrega.notas || "Ninguna";
+
+            // Tabla de Productos
+            const tbody = document.getElementById('dtl-tabla-productos');
+            tbody.innerHTML = '';
+            pedido.productos.forEach(prod => {
+                const sub = prod.precio * (prod.cantidad || 1);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${prod.cantidad || 1}x</strong></td>
+                    <td>
+                        <strong>${prod.nombre}</strong> (${prod.tamano || 'Estándar'})
+                        <div class="sub-specs-receta">
+                            • Bizcocho: ${prod.pan || 'Tradicional'} | Relleno: ${prod.relleno || 'Estándar'}<br>
+                            • Cobertura: ${prod.cobertura || 'Chantilly'} ${prod.extras ? '| Extras: ' + prod.extras.join(', ') : ''}<br>
+                            ${prod.dedicatoria ? '• Leyenda: "' + prod.dedicatoria + '"' : ''}
+                        </div>
+                    </td>
+                    <td>$${prod.precio.toFixed(2)}</td>
+                    <td><strong>$${sub.toFixed(2)}</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Información Financiera (RF-25, RF-26)
+            document.getElementById('dtl-pago-metodo').textContent = pedido.pago.modalidad;
+            document.getElementById('dtl-pago-total').textContent = `$${pedido.pago.montoTotal.toFixed(2)}`;
+            document.getElementById('dtl-pago-cubierto').textContent = `$${(pedido.pago.montoPagado || 0).toFixed(2)}`;
+            document.getElementById('dtl-pago-saldo').textContent = `$${(pedido.pago.saldoPendiente || pedido.pago.montoTotal).toFixed(2)}`;
+            document.getElementById('dtl-pago-estado').textContent = pedido.pago.estadoValidacion || 'Pendiente de Cobro';
+
+            // Comprobar Regla RF-27: Bloqueo de Preparación sin Pago Confirmado
+            const alertaBloqueo = document.getElementById('alerta-bloqueo');
+            const btnAvanzar = document.getElementById('btn-avanzar-fase');
+            const pagoValidado = (pedido.pago.estadoValidacion === 'Confirmado') || ((pedido.pago.montoPagado || 0) > 0);
+
+            if (pedido.estado.toLowerCase() === 'pendiente' && !pagoValidado) {
+                alertaBloqueo.classList.add('activo');
+                btnAvanzar.disabled = true;
+                btnAvanzar.textContent = "Bloqueado: Requiere Validación de Pago";
+            } else {
+                alertaBloqueo.classList.remove('activo');
+                btnAvanzar.disabled = false;
+                actualizarTextoBotonAvanzar(pedido.estado);
+            }
+
+            // WhatsApp Dinámico
+            const msg = `Hola ${pedido.cliente.nombre}, nos comunicamos de Repostería CARMIR sobre tu pedido ${pedido.folio} (Estado actual: ${pedido.estado}).`;
+            document.getElementById('dtl-btn-wa').href = `https://wa.me/${pedido.cliente.telefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`;
+        }
+
+        function actualizarTextoBotonAvanzar(estadoActual) {
+            const btn = document.getElementById('btn-avanzar-fase');
+            const e = estadoActual.toLowerCase();
+
+            if (e === 'pendiente') {
+                btn.textContent = 'Aprobar y Pasar a "En Preparación" →';
+            } else if (e === 'en preparación') {
+                btn.textContent = 'Marcar como "Listo para Entrega" ✓';
+            } else if (e === 'listo') {
+                btn.textContent = 'Completar y Marcar "Entregado" 🏁';
+            } else {
+                btn.disabled = true;
+                btn.textContent = 'Pedido Finalizado';
+            }
+        }
+
+        // Transición de Estados Operativos (RF-28)
+        function avanzarEstadoOperativo() {
+            if (!pedidoSeleccionadoActual) return;
+
+            const estado = pedidoSeleccionadoActual.estado.toLowerCase();
+
+            if (estado === 'pendiente') {
+                // Verificar RF-27 antes de avanzar
+                const pagoValidado = (pedidoSeleccionadoActual.pago.estadoValidacion === 'Confirmado') || ((pedidoSeleccionadoActual.pago.montoPagado || 0) > 0);
+                if (!pagoValidado) {
+                    alert("No es posible pasar a preparación. El pedido no cuenta con anticipo o pago confirmado (RF-27).");
+                    return;
+                }
+
+                pedidoSeleccionadoActual.estado = 'En preparación';
+
+                // Disparo de deducción de insumos (Patrón Observer - RF-44)
+                ejecutarDeduccionInsumosPorReceta(pedidoSeleccionadoActual);
+
+            } else if (estado === 'en preparación') {
+                pedidoSeleccionadoActual.estado = 'Listo';
+            } else if (estado === 'listo') {
+                pedidoSeleccionadoActual.estado = 'Entregado';
+                pedidoSeleccionadoActual.pago.saldoPendiente = 0.00;
+                pedidoSeleccionadoActual.pago.montoPagado = pedidoSeleccionadoActual.pago.montoTotal;
+                pedidoSeleccionadoActual.pago.estadoValidacion = 'Confirmado';
+            }
+
+            guardarCambiosPersistentes();
+            seleccionarPedido(pedidoSeleccionadoActual);
+        }
+
+        // Simulación del Patrón Observer para descuento automático de insumos en inventario (RF-44)
+        function ejecutarDeduccionInsumosPorReceta(pedido) {
+            const inventario = JSON.parse(localStorage.getItem('carmir_inventario')) || [];
+
+            // Regla de consumo base por cada postre ordenado
+            pedido.productos.forEach(prod => {
+                const multiplicador = prod.cantidad || 1;
+                
+                // Descontar Harina (INS-001) y Azúcar (INS-002)
+                const harina = inventario.find(i => i.id === 'INS-001');
+                if (harina) harina.stockActual = Math.max(0, +(harina.stockActual - 0.5 * multiplicador).toFixed(2));
+
+                const azucar = inventario.find(i => i.id === 'INS-002');
+                if (azucar) azucar.stockActual = Math.max(0, +(azucar.stockActual - 0.25 * multiplicador).toFixed(2));
+
+                const huevo = inventario.find(i => i.id === 'INS-006');
+                if (huevo) huevo.stockActual = Math.max(0, huevo.stockActual - 4 * multiplicador);
+            });
+
+            localStorage.setItem('carmir_inventario', JSON.stringify(inventario));
+        }
+
+        // Modales de Pago (RF-25, RF-26)
+        function abrirModalValidarPago() {
+            if (!pedidoSeleccionadoActual) return;
+            const modal = document.getElementById('modal-pago');
+            const inputAbono = document.getElementById('modal-input-abono');
+            
+            // Sugerir saldo restante o 50% de anticipo
+            const sugerido = pedidoSeleccionadoActual.pago.saldoPendiente > 0 
+                ? pedidoSeleccionadoActual.pago.saldoPendiente 
+                : (pedidoSeleccionadoActual.pago.montoTotal / 2);
+            
+            inputAbono.value = sugerido.toFixed(2);
+            modal.classList.add('activo');
+        }
+
+        function cerrarModalPago() {
+            document.getElementById('modal-pago').classList.remove('activo');
+        }
+
+        function guardarValidacionPago() {
+            const abono = parseFloat(document.getElementById('modal-input-abono').value);
+            if (isNaN(abono) || abono <= 0) {
+                alert("Por favor ingresa un monto válido mayor a 0.");
+                return;
+            }
+
+            const forma = document.getElementById('modal-select-forma-pago').value;
+            const nuevoPagado = (pedidoSeleccionadoActual.pago.montoPagado || 0) + abono;
+            const nuevoSaldo = Math.max(0, pedidoSeleccionadoActual.pago.montoTotal - nuevoPagado);
+
+            pedidoSeleccionadoActual.pago.montoPagado = nuevoPagado;
+            pedidoSeleccionadoActual.pago.saldoPendiente = nuevoSaldo;
+            pedidoSeleccionadoActual.pago.estadoValidacion = 'Confirmado';
+            pedidoSeleccionadoActual.pago.modalidad = forma;
+
+            cerrarModalPago();
+            guardarCambiosPersistentes();
+            seleccionarPedido(pedidoSeleccionadoActual);
+        }
+
+        // Modal de Cancelación (RF-24)
+        function abrirModalCancelar() {
+            document.getElementById('modal-cancelar').classList.add('activo');
+        }
+
+        function cerrarModalCancelar() {
+            document.getElementById('modal-cancelar').classList.remove('activo');
+        }
+
+        function confirmarCancelacionPedido() {
+            const motivo = document.getElementById('modal-txt-motivo-cancelacion').value.trim();
+            if (!motivo) {
+                alert("Debes indicar un motivo de cancelación para registrar la anulación.");
+                return;
+            }
+
+            pedidoSeleccionadoActual.estado = 'Cancelado';
+            pedidoSeleccionadoActual.motivoCancelacion = motivo;
+
+            cerrarModalCancelar();
+            guardarCambiosPersistentes();
+            seleccionarPedido(pedidoSeleccionadoActual);
+        }
+
+        // Filtros y Búsqueda
+        function filtrarPorEstado(estado, btn) {
+            filtroEstadoActual = estado;
+            document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
+            btn.classList.add('activo');
+            renderizarListaPedidos();
+        }
+
+        function filtrarListaPedidos() {
+            renderizarListaPedidos();
+        }
+
+        function guardarCambiosPersistentes() {
+            const index = pedidosLocales.findIndex(p => p.folio === pedidoSeleccionadoActual.folio);
+            if (index !== -1) {
+                pedidosLocales[index] = pedidoSeleccionadoActual;
+                localStorage.setItem('carmir_pedidos', JSON.stringify(pedidosLocales));
+            }
+        }
+
+        function imprimirTicket() {
+            window.print();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            validarSesion();
+            cargarPedidos();
+        });
+    </script>
+</body>
+</html>

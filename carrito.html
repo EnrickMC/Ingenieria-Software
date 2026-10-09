@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito y Checkout - CARMIR</title>
+    <style>
+        :root {
+            --bg-crema: #FAF3E0;
+            --bg-superficie: #FFFFFF;
+            --primario-rosa: #E28D8D;
+            --primario-hover: #D47A7A;
+            --acento-canela: #B37D4E;
+            --acento-dorado: #D29D6A;
+            --texto-oscuro: #4A3B32;
+            --texto-mutado: #7D6E65;
+            --borde-suave: #F0E2D0;
+            --verde-exito: #2ECC71;
+            --rojo-alerta: #E74C3C;
+            --fuente-base: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --sombra: 0 4px 15px rgba(74, 59, 50, 0.08);
+            --radio: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente-base);
+            background-color: var(--bg-crema);
+            color: var(--texto-oscuro);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Barra de navegación */
+        .navbar {
+            background-color: var(--acento-dorado);
+            color: #FFFFFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-brand {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #FFFFFF;
+            text-decoration: none;
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 1.8rem;
+            align-items: center;
+        }
+
+        .navbar-nav a {
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: opacity 0.2s ease;
+        }
+
+        .navbar-nav a:hover,
+        .navbar-nav a.active {
+            opacity: 0.85;
+            text-decoration: underline;
+            text-underline-offset: 6px;
+        }
+
+        .cart-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            text-decoration: none !important;
+            font-weight: 600 !important;
+        }
+
+        /* Contenedor Principal Checkout */
+        .contenedor-checkout {
+            max-width: 1250px;
+            margin: 2rem auto 4rem;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 2.5rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Paneles */
+        .panel {
+            background-color: var(--bg-superficie);
+            border-radius: var(--radio);
+            border: 1px solid var(--borde-suave);
+            box-shadow: var(--sombra);
+            padding: 2rem;
+            height: fit-content;
+        }
+
+        .panel-titulo {
+            font-size: 1.4rem;
+            color: var(--texto-oscuro);
+            border-bottom: 2px solid #F6E2C9;
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Listado de Productos en Carrito */
+        .lista-items-carrito {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .item-carrito-tarjeta {
+            border: 1px solid var(--borde-suave);
+            border-radius: 8px;
+            padding: 1.2rem;
+            background-color: #FAF6F0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .item-carrito-tarjeta:hover {
+            border-color: var(--acento-dorado);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .item-titulo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--texto-oscuro);
+        }
+
+        .btn-eliminar-item {
+            background: none;
+            border: none;
+            color: var(--rojo-alerta);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.2rem;
+            line-height: 1;
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-eliminar-item:hover {
+            opacity: 1;
+        }
+
+        .item-especificaciones {
+            font-size: 0.85rem;
+            color: var(--texto-mutado);
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            background: #FFFFFF;
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            border-left: 3px solid var(--acento-canela);
+        }
+
+        .item-dedicatoria {
+            color: var(--primario-rosa);
+            font-style: italic;
+            font-weight: 600;
+        }
+
+        .item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px dashed var(--borde-suave);
+            padding-top: 0.6rem;
+        }
+
+        .controles-cantidad {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-qty {
+            background-color: #FFFFFF;
+            border: 1px solid #DCD0C0;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            font-weight: 700;
+            color: var(--texto-oscuro);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .btn-qty:hover {
+            background-color: var(--acento-dorado);
+            color: #FFFFFF;
+            border-color: var(--acento-dorado);
+        }
+
+        .qty-valor {
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .item-subtotal {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--acento-canela);
+        }
+
+        /* Resumen de Costos */
+        .resumen-totales-caja {
+            background-color: #FFFFFF;
+            border-top: 2px solid #F6E2C9;
+            padding-top: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            font-size: 0.95rem;
+        }
+
+        .fila-total {
+            display: flex;
+            justify-content: space-between;
+            color: var(--texto-mutado);
+        }
+
+        .fila-gran-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--acento-canela);
+            border-top: 1px solid var(--borde-suave);
+            padding-top: 0.8rem;
+            margin-top: 0.4rem;
+        }
+
+        /* Formulario de Checkout */
+        .grupo-form {
+            margin-bottom: 1.2rem;
+        }
+
+        .grupo-form label {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--texto-oscuro);
+            margin-bottom: 0.35rem;
+        }
+
+        .grupo-form input,
+        .grupo-form select,
+        .grupo-form textarea {
+            width: 100%;
+            padding: 0.75rem 0.9rem;
+            border: 1px solid #DCD0C0;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            background-color: #FAF6F0;
+            color: var(--texto-oscuro);
+            outline: none;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .grupo-form input:focus,
+        .grupo-form select:focus,
+        .grupo-form textarea:focus {
+            border-color: var(--acento-dorado);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(210, 157, 106, 0.15);
+        }
+
+        .grid-dos-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .grid-tres-cols {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        /* Sección de Domicilio Condicional */
+        #seccion-direccion {
+            display: none;
+            background-color: #FAF6F0;
+            border: 1px solid var(--borde-suave);
+            border-radius: 8px;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+            animation: fadeIn 0.25s ease;
+        }
+
+        #seccion-direccion.visible {
+            display: block;
+        }
+
+        /* Cuadro de Instrucciones Bancarias */
+        #instrucciones-transferencia {
+            display: none;
+            background-color: #FFF9E6;
+            border: 1px solid #F5E5C9;
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: #7B6843;
+            margin-bottom: 1.2rem;
+        }
+
+        #instrucciones-transferencia.visible {
+            display: block;
+        }
+
+        .btn-confirmar-pedido {
+            background-color: var(--primario-rosa);
+            color: #FFFFFF;
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(226, 141, 141, 0.4);
+            transition: all 0.25s ease;
+            margin-top: 1rem;
+        }
+
+        .btn-confirmar-pedido:hover {
+            background-color: var(--primario-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(226, 141, 141, 0.5);
+        }
+
+        /* Carrito Vacío */
+        .carrito-vacio-box {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--texto-mutado);
+        }
+
+        .carrito-vacio-box h3 {
+            margin-bottom: 0.5rem;
+            color: var(--texto-oscuro);
+        }
+
+        .btn-ir-catalogo {
+            display: inline-block;
+            margin-top: 1rem;
+            background-color: var(--acento-canela);
+            color: #FFFFFF;
+            padding: 0.65rem 1.5rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Modales */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .modal-overlay.activo {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--bg-superficie);
+            border-radius: var(--radio);
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-box h3 {
+            color: var(--texto-oscuro);
+            margin-bottom: 0.8rem;
+        }
+
+        .modal-box p {
+            font-size: 0.95rem;
+            color: var(--texto-mutado);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-acciones {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-modal-cancelar {
+            background-color: #ECE5DD;
+            color: var(--texto-oscuro);
+            border: none;
+            padding: 0.65rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-modal-confirmar {
+            background-color: var(--rojo-alerta);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.65rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Modal de Pedido Exitoso */
+        .modal-exito-box {
+            background: #FFFFFF;
+            border-radius: var(--radio);
+            width: 100%;
+            max-width: 520px;
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .icono-exito {
+            font-size: 3.5rem;
+            color: var(--verde-exito);
+            margin-bottom: 0.5rem;
+        }
+
+        .folio-destacado {
+            background-color: #FAF3E0;
+            border: 2px dashed var(--acento-dorado);
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--acento-canela);
+            margin: 1.2rem 0;
+            letter-spacing: 1px;
+        }
+
+        .btn-whatsapp-notif {
+            background-color: #25D366;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 0.85rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-whatsapp-notif:hover {
+            background-color: #1EBE5D;
+        }
+
+        .btn-rastreo {
+            display: inline-block;
+            margin-top: 0.8rem;
+            color: var(--texto-mutado);
+            text-decoration: underline;
+            font-size: 0.88rem;
+        }
+
+        footer {
+            background-color: #3B2E28;
+            color: #E2D9D2;
+            text-align: center;
+            padding: 1.8rem 1rem;
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 950px) {
+            .contenedor-checkout {
+                grid-template-columns: 1fr;
+            }
+            .grid-dos-cols, .grid-tres-cols {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navegación -->
+    <header class="navbar">
+        <a href="index.html" class="navbar-brand">CARMIR</a>
+        <nav>
+            <ul class="navbar-nav">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="catalogo.html">Catálogo</a></li>
+                <li><a href="seguimiento.html">Seguimiento</a></li>
+                <li>
+                    <a href="carrito.html" class="cart-indicator">
+                        🛒 Carrito (<span id="cart-counter">0</span>)
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="contenedor-checkout">
+        
+        <!-- PANEL IZQUIERDO: DETALLE DE ARTÍCULOS EN EL CARRITO (RF-13, RF-14, RF-15) -->
+        <section class="panel">
+            <div class="panel-titulo">
+                <h2>Resumen de tu Pedido</h2>
+                <span id="label-items-total" style="font-size: 0.9rem; color: var(--texto-mutado);">0 artículos</span>
+            </div>
+
+            <!-- Listado dinámico de postres -->
+            <div id="contenedor-items" class="lista-items-carrito">
+                <!-- Inyectado por JavaScript -->
+            </div>
+
+            <!-- Desglose Financiero -->
+            <div class="resumen-totales-caja">
+                <div class="fila-total">
+                    <span>Subtotal de Postres:</span>
+                    <strong id="resumen-subtotal">$0.00 MXN</strong>
+                </div>
+                <div class="fila-total">
+                    <span>Costo de Entrega:</span>
+                    <strong id="resumen-envio">Gratis (Recoger en Sucursal)</strong>
+                </div>
+                <div class="fila-gran-total">
+                    <span>Total a Pagar:</span>
+                    <strong id="resumen-total">$0.00 MXN</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- PANEL DERECHO: FORMULARIO DE ENTREGA Y PAGO (RF-16, RF-17, RF-18) -->
+        <section class="panel">
+            <div class="panel-titulo">
+                <h2>Datos de Entrega y Pago</h2>
+            </div>
+
+            <form id="form-checkout" onsubmit="procesarSolicitudPedido(event)">
+                
+                <!-- Datos del Cliente (Entidad Cliente) -->
+                <div class="grupo-form">
+                    <label for="txt-nombre">Nombre Completo del Cliente: *</label>
+                    <input type="text" id="txt-nombre" required placeholder="Ej. Ana María López Pérez">
+                </div>
+
+                <div class="grid-dos-cols">
+                    <div class="grupo-form">
+                        <label for="txt-telefono">Teléfono WhatsApp (10 dígitos): *</label>
+                        <input type="tel" id="txt-telefono" required pattern="[0-9]{10}" placeholder="4771234567">
+                    </div>
+                    <div class="grupo-form">
+                        <label for="txt-correo">Correo Electrónico: *</label>
+                        <input type="email" id="txt-correo" required placeholder="ejemplo@correo.com">
+                    </div>
+                </div>
+
+                <!-- Logística y Fecha/Hora Límite de Entrega -->
+                <div class="grid-dos-cols">
+                    <div class="grupo-form">
+                        <label for="select-entrega">Modalidad de Entrega: *</label>
+                        <select id="select-entrega" onchange="alternarModalidadEntrega()">
+                            <option value="sucursal">Recoger en Sucursal (Gratis)</option>
+                            <option value="domicilio">Entrega a Domicilio (+ $50.00 MXN)</option>
+                        </select>
+                    </div>
+
+                    <div class="grupo-form">
+                        <label for="txt-fecha-entrega">Fecha y Hora de Entrega: *</label>
+                        <input type="datetime-local" id="txt-fecha-entrega" required>
+                    </div>
+                </div>
+
+                <!-- Campos de Domicilio (Entidad Pedido y Direccion en Diccionario V3) -->
+                <div id="seccion-direccion">
+                    <h4 style="font-size: 0.95rem; color: var(--acento-canela); margin-bottom: 0.8rem;">
+                        Dirección de Recepción del Pedido:
+                    </h4>
+                    
+                    <div class="grupo-form">
+                        <label for="txt-calle">Calle: *</label>
+                        <input type="text" id="txt-calle" placeholder="Av. Principal, Blvd. o Calle">
+                    </div>
+
+                    <div class="grid-tres-cols">
+                        <div class="grupo-form">
+                            <label for="txt-colonia">Colonia: *</label>
+                            <input type="text" id="txt-colonia" placeholder="Colonia o Fracc.">
+                        </div>
+                        <div class="grupo-form">
+                            <label for="txt-exterior">No. Ext: *</label>
+                            <input type="text" id="txt-exterior" placeholder="123">
+                        </div>
+                        <div class="grupo-form">
+                            <label for="txt-interior">No. Int:</label>
+                            <input type="text" id="txt-interior" placeholder="B">
+                        </div>
+                    </div>
+
+                    <div class="grupo-form">
+                        <label for="txt-cp">Código Postal: *</label>
+                        <input type="text" id="txt-cp" maxlength="5" placeholder="37000">
+                    </div>
+                </div>
+
+                <!-- Modalidad de Pago (Entidad Pago) -->
+                <div class="grupo-form">
+                    <label for="select-pago">Modalidad de Pago: *</label>
+                    <select id="select-pago" onchange="alternarModalidadPago()">
+                        <option value="efectivo">Pago en Efectivo al Recibir / Entregar</option>
+                        <option value="transferencia">Transferencia Bancaria / SPEI (Anticipo 50%)</option>
+                    </select>
+                </div>
+
+                <!-- Bloque de datos bancarios para transferencia -->
+                <div id="instrucciones-transferencia">
+                    <strong>Datos para Depósito / SPEI:</strong><br>
+                    Banco: BBVA Bancomer<br>
+                    Beneficiario: Delicias de Postres CARMIR<br>
+                    CLABE: 012 225 00123456789 0<br>
+                    <em>* Tras enviar el pedido, envía la captura de tu comprobante a nuestro WhatsApp para validar y liberar la producción.</em>
+                </div>
+
+                <div class="grupo-form">
+                    <label for="txt-notas">Notas adicionales de entrega:</label>
+                    <textarea id="txt-notas" placeholder="Referencias de la fachada, timbre, indicaciones especiales..."></textarea>
+                </div>
+
+                <button type="submit" id="btn-submit-order" class="btn-confirmar-pedido">
+                    Confirmar y Enviar Pedido
+                </button>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- Modal de Doble Confirmación para Eliminar (RNF-5) -->
+    <div id="modal-confirmar-eliminar" class="modal-overlay">
+        <div class="modal-box">
+            <h3>¿Eliminar este postre?</h3>
+            <p>El postre personalizado será retirado de tu carrito de compras.</p>
+            <div class="modal-acciones">
+                <button class="btn-modal-cancelar" onclick="cerrarModalEliminar()">Conservar</button>
+                <button class="btn-modal-confirmar" onclick="confirmarEliminarItem()">Sí, Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pedido Confirmado con Éxito (RF-18, RF-31) -->
+    <div id="modal-exito" class="modal-overlay">
+        <div class="modal-exito-box">
+            <div class="icono-exito">✓</div>
+            <h2>¡Solicitud Recibida con Éxito!</h2>
+            <p>Hemos registrado tu pedido en nuestro sistema central.</p>
+            
+            <div class="folio-destacado" id="display-folio-generado">
+                FOLIO: #FOL-2026-0000
+            </div>
+
+            <p style="font-size: 0.9rem; color: var(--texto-mutado);">
+                Haz clic en el siguiente botón para notificarnos y abrir el chat de WhatsApp con el resumen listo para confirmación de anticipo.
+            </p>
+
+            <a id="btn-enviar-wa" href="#" target="_blank" class="btn-whatsapp-notif">
+                💬 Notificar Pedido a WhatsApp
+            </a>
+
+            <div>
+                <a href="seguimiento.html" class="btn-rastreo">Ir a Seguimiento de Pedidos</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer>
+        <p>&copy; 2026 Sistema CARMIR - Desarrollado para Delicias de Postres. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Lógica de Negocio y Persistencia en XAMPP -->
+    <script>
+        let indiceAEliminar = null;
+        let costoEnvioActual = 0.00;
+
+        // Gestión de Carrito en LocalStorage
+        function obtenerCarrito() {
+            return JSON.parse(localStorage.getItem('carmir_carrito')) || [];
+        }
+
+        function guardarCarrito(carrito) {
+            localStorage.setItem('carmir_carrito', JSON.stringify(carrito));
+            renderizarCarrito();
+        }
+
+        function renderizarCarrito() {
+            const carrito = obtenerCarrito();
+            const contenedor = document.getElementById('contenedor-items');
+            const totalItemsEl = document.getElementById('cart-counter');
+            const labelItemsTotal = document.getElementById('label-items-total');
+            const btnSubmit = document.getElementById('btn-submit-order');
+
+            const totalCantidad = carrito.reduce((acc, item) => acc + (item.cantidad || 1), 0);
+            if (totalItemsEl) totalItemsEl.textContent = totalCantidad;
+            if (labelItemsTotal) labelItemsTotal.textContent = `${totalCantidad} artículo(s)`;
+
+            if (carrito.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="carrito-vacio-box">
+                        <h3>Tu carrito de compras está vacío</h3>
+                        <p>Aún no has agregado pasteles o gelatinas personalizadas.</p>
+                        <a href="catalogo.html" class="btn-ir-catalogo">Ir a Explorar Catálogo</a>
+                    </div>
+                `;
+                document.getElementById('resumen-subtotal').textContent = "$0.00 MXN";
+                document.getElementById('resumen-total').textContent = "$0.00 MXN";
+                btnSubmit.disabled = true;
+                btnSubmit.style.opacity = '0.5';
+                btnSubmit.style.cursor = 'not-allowed';
+                return;
+            }
+
+            btnSubmit.disabled = false;
+            btnSubmit.style.opacity = '1';
+            btnSubmit.style.cursor = 'pointer';
+
+            contenedor.innerHTML = '';
+            let subtotalCalculado = 0;
+
+            carrito.forEach((item, index) => {
+                const subtotalItem = item.precio * (item.cantidad || 1);
+                subtotalCalculado += subtotalItem;
+
+                const tarjeta = document.createElement('article');
+                tarjeta.className = 'item-carrito-tarjeta';
+                
+                const extrasTexto = (item.extras && item.extras.length > 0) 
+                    ? `Aditamentos: ${item.extras.join(', ')}` 
+                    : 'Sin aditamentos extra';
+
+                const dedicatoriaTexto = item.dedicatoria 
+                    ? `<div class="item-dedicatoria">Leyenda: "${item.dedicatoria}"</div>` 
+                    : '';
+
+                tarjeta.innerHTML = `
+                    <div class="item-header">
+                        <div>
+                            <div class="item-titulo">${item.nombre}</div>
+                            <span style="font-size: 0.8rem; color: var(--acento-canela); font-weight: 600;">$${item.precio.toFixed(2)} c/u</span>
+                        </div>
+                        <button type="button" class="btn-eliminar-item" onclick="solicitarEliminar(${index})" title="Eliminar del carrito">
+                            ✕
+                        </button>
+                    </div>
+
+                    <div class="item-especificaciones">
+                        <div><strong>Porciones:</strong> ${item.tamano || 'Estándar'}</div>
+                        <div><strong>Configuración:</strong> ${item.pan || 'Base normal'} | ${item.relleno || 'Relleno clásico'}</div>
+                        <div><strong>Cobertura:</strong> ${item.cobertura || 'Chantilly'}</div>
+                        <div><strong>Detalles:</strong> ${extrasTexto}</div>
+                        ${dedicatoriaTexto}
+                    </div>
+
+                    <div class="item-footer">
+                        <div class="controles-cantidad">
+                            <button type="button" class="btn-qty" onclick="ajustarCantidad(${index}, -1)">-</button>
+                            <span class="qty-valor">${item.cantidad || 1}</span>
+                            <button type="button" class="btn-qty" onclick="ajustarCantidad(${index}, 1)">+</button>
+                        </div>
+                        <div class="item-subtotal">
+                            $${subtotalItem.toFixed(2)} MXN
+                        </div>
+                    </div>
+                `;
+                contenedor.appendChild(tarjeta);
+            });
+
+            // Actualizar resumen
+            document.getElementById('resumen-subtotal').textContent = `$${subtotalCalculado.toFixed(2)} MXN`;
+            const totalConEnvio = subtotalCalculado + costoEnvioActual;
+            document.getElementById('resumen-total').textContent = `$${totalConEnvio.toFixed(2)} MXN`;
+        }
+
+        // Modificar productos del carrito (RF-14)
+        function ajustarCantidad(index, delta) {
+            const carrito = obtenerCarrito();
+            if (!carrito[index]) return;
+
+            const nuevaCantidad = (carrito[index].cantidad || 1) + delta;
+            if (nuevaCantidad <= 0) {
+                solicitarEliminar(index);
+            } else {
+                carrito[index].cantidad = nuevaCantidad;
+                guardarCarrito(carrito);
+            }
+        }
+
+        // Eliminar productos del carrito con confirmación (RF-15, RNF-5)
+        function solicitarEliminar(index) {
+            indiceAEliminar = index;
+            document.getElementById('modal-confirmar-eliminar').classList.add('activo');
+        }
+
+        function cerrarModalEliminar() {
+            indiceAEliminar = null;
+            document.getElementById('modal-confirmar-eliminar').classList.remove('activo');
+        }
+
+        function confirmarEliminarItem() {
+            if (indiceAEliminar !== null) {
+                const carrito = obtenerCarrito();
+                carrito.splice(indiceAEliminar, 1);
+                cerrarModalEliminar();
+                guardarCarrito(carrito);
+            }
+        }
+
+        // Alternar Modalidad de Entrega (RF-16)
+        function alternarModalidadEntrega() {
+            const modalidad = document.getElementById('select-entrega').value;
+            const seccionDireccion = document.getElementById('seccion-direccion');
+            const resumenEnvio = document.getElementById('resumen-envio');
+
+            const camposRequeridos = ['txt-calle', 'txt-colonia', 'txt-exterior', 'txt-cp'];
+
+            if (modalidad === 'domicilio') {
+                seccionDireccion.classList.add('visible');
+                camposRequeridos.forEach(id => document.getElementById(id).required = true);
+                costoEnvioActual = 50.00;
+                resumenEnvio.textContent = "$50.00 MXN (Tarifa Base)";
+            } else {
+                seccionDireccion.classList.remove('visible');
+                camposRequeridos.forEach(id => document.getElementById(id).required = false);
+                costoEnvioActual = 0.00;
+                resumenEnvio.textContent = "Gratis (Recoger en Sucursal)";
+            }
+
+            renderizarCarrito();
+        }
+
+        // Alternar Modalidad de Pago (RF-17)
+        function alternarModalidadPago() {
+            const metodo = document.getElementById('select-pago').value;
+            const bloqueInfo = document.getElementById('instrucciones-transferencia');
+            if (metodo === 'transferencia') {
+                bloqueInfo.classList.add('visible');
+            } else {
+                bloqueInfo.classList.remove('visible');
+            }
+        }
+
+        // Enviar pedido y persistir en la base de datos simulada (RF-18)
+        function procesarSolicitudPedido(e) {
+            e.preventDefault();
+
+            const carrito = obtenerCarrito();
+            if (carrito.length === 0) {
+                alert("El carrito está vacío. Agrega un postre antes de continuar.");
+                return;
+            }
+
+            // Generar folio correlativo único
+            const anio = new Date().getFullYear();
+            const correlativo = Math.floor(1000 + Math.random() * 9000);
+            const folioGenerado = `#FOL-${anio}-${correlativo}`;
+
+            const subtotal = carrito.reduce((acc, it) => acc + (it.precio * (it.cantidad || 1)), 0);
+            const total = subtotal + costoEnvioActual;
+            const modalidadEntrega = document.getElementById('select-entrega').value;
+            const modalidadPago = document.getElementById('select-pago').value;
+
+            // Ensamblar objeto según el Diccionario de Datos V3 (Entidades: Cliente, Pedido, Pago)
+            const nuevoPedido = {
+                folio: folioGenerado,
+                fechaCreacion: new Date().toISOString(),
+                cliente: {
+                    nombre: document.getElementById('txt-nombre').value.trim(),
+                    telefono: document.getElementById('txt-telefono').value.trim(),
+                    correo: document.getElementById('txt-correo').value.trim()
+                },
+                entrega: {
+                    modalidad: modalidadEntrega === 'domicilio' ? 'A Domicilio' : 'Recoger en Sucursal',
+                    fechaHoraEsperada: document.getElementById('txt-fecha-entrega').value,
+                    direccion: modalidadEntrega === 'domicilio' ? {
+                        calle: document.getElementById('txt-calle').value.trim(),
+                        colonia: document.getElementById('txt-colonia').value.trim(),
+                        numeroExterior: document.getElementById('txt-exterior').value.trim(),
+                        numeroInterior: document.getElementById('txt-interior').value.trim() || 'S/N',
+                        codigoPostal: document.getElementById('txt-cp').value.trim()
+                    } : null,
+                    notas: document.getElementById('txt-notas').value.trim()
+                },
+                pago: {
+                    modalidad: modalidadPago === 'transferencia' ? 'Transferencia' : 'Efectivo',
+                    montoTotal: total,
+                    montoPagado: 0.00,
+                    saldoPendiente: total,
+                    estadoValidacion: 'Pendiente de Validación'
+                },
+                estado: 'Pendiente', // Estados: Pendiente, Aprobado, En preparación, Listo, Entregado, Cancelado
+                productos: carrito
+            };
+
+            // Guardar en la bandeja central de pedidos para que lo consuma el Dashboard y Gestión de Pedidos
+            const pedidosRegistrados = JSON.parse(localStorage.getItem('carmir_pedidos')) || [];
+            pedidosRegistrados.unshift(nuevoPedido);
+            localStorage.setItem('carmir_pedidos', JSON.stringify(pedidosRegistrados));
+
+            // Limpiar Carrito
+            localStorage.removeItem('carmir_carrito');
+
+            // Configurar enlace de WhatsApp (RF-31)
+            configurarBotonWhatsApp(nuevoPedido);
+
+            // Mostrar Modal de Éxito
+            document.getElementById('display-folio-generado').textContent = `FOLIO: ${nuevoPedido.folio}`;
+            document.getElementById('modal-exito').classList.add('activo');
+        }
+
+        function configurarBotonWhatsApp(pedido) {
+            const telefonoPasteleria = "524771234567"; // Número del establecimiento CARMIR
+            let mensaje = `*¡Hola Pastelería CARMIR!*%0A`;
+            mensaje += `Acabo de registrar una solicitud de pedido en su plataforma web:%0A%0A`;
+            mensaje += `📋 *Folio:* ${pedido.folio}%0A`;
+            mensaje += `👤 *Cliente:* ${pedido.cliente.nombre}%0A`;
+            mensaje += `📦 *Modalidad:* ${pedido.entrega.modalidad}%0A`;
+            mensaje += `📅 *Fecha Solicitada:* ${pedido.entrega.fechaHoraEsperada}%0A`;
+            mensaje += `💰 *Total a Liquidar:* $${pedido.pago.montoTotal.toFixed(2)} MXN%0A`;
+            mensaje += `💳 *Método de Pago:* ${pedido.pago.modalidad}%0A%0A`;
+            mensaje += `*Detalle de postres:*%0A`;
+
+            pedido.productos.forEach(p => {
+                mensaje += `• ${p.cantidad}x ${p.nombre} (${p.tamano}) - $${(p.precio * p.cantidad).toFixed(2)}%0A`;
+                if (p.dedicatoria) mensaje += `  _Dedicatoria: "${p.dedicatoria}"_%0A`;
+            });
+
+            mensaje += `%0A¿Me podrían confirmar si los datos están completos para proceder con el anticipo? ¡Muchas gracias!`;
+
+            const btnWA = document.getElementById('btn-enviar-wa');
+            btnWA.href = `https://wa.me/${telefonoPasteleria}?text=${mensaje}`;
+        }
+
+        // Restricción de fecha mínima (a partir de hoy)
+        function configurarFechaMinima() {
+            const inputFecha = document.getElementById('txt-fecha-entrega');
+            const ahora = new Date();
+            ahora.setHours(ahora.getHours() + 2); // Mínimo 2 horas de anticipación
+            const isoString = ahora.toISOString().slice(0, 16);
+            inputFecha.min = isoString;
+            inputFecha.value = isoString;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarCarrito();
+            configurarFechaMinima();
+        });
+    </script>
+</body>
+</html>

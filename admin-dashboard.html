@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARMIR Admin - Panel de Control</title>
+    <style>
+        :root {
+            --bg-software: #EEF2F5;
+            --sidebar-fondo: #2C3E50;
+            --sidebar-header: #1A252F;
+            --sidebar-hover: #34495E;
+            --acento-canela: #D4A373;
+            --acento-dorado: #D29D6A;
+            --verde-exito: #2ECC71;
+            --verde-hover: #27AE60;
+            --azul-link: #3498DB;
+            --azul-hover: #2980B9;
+            --rojo-alerta: #E74C3C;
+            --amarillo-aviso: #F39C12;
+            --texto-oscuro: #2C3E50;
+            --texto-mutado: #7F8C8D;
+            --borde-suave: #ECF0F1;
+            --fuente-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --radio: 8px;
+            --sombra-card: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente-base);
+            background-color: var(--bg-software);
+            color: var(--texto-oscuro);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* BARRA LATERAL (SIDEBAR) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-fondo);
+            color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1.2rem;
+            background-color: var(--sidebar-header);
+            text-align: center;
+            border-bottom: 1px solid var(--sidebar-hover);
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            color: var(--acento-canela);
+            letter-spacing: 1.5px;
+        }
+
+        .sidebar-header p {
+            margin: 4px 0 0;
+            font-size: 0.75rem;
+            color: #BDC3C7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-navegacion {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-navegacion li {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-navegacion a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #ECF0F1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .menu-navegacion a:hover,
+        .menu-navegacion a.activo {
+            background-color: var(--sidebar-hover);
+            border-left: 4px solid var(--acento-canela);
+            color: #FFFFFF;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            background-color: var(--sidebar-header);
+            border-top: 1px solid var(--sidebar-hover);
+        }
+
+        .btn-cerrar-sesion {
+            width: 100%;
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #E74C3C;
+            border: 1px solid #E74C3C;
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cerrar-sesion:hover {
+            background-color: #E74C3C;
+            color: #FFFFFF;
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        .contenido-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* BARRA SUPERIOR */
+        .topbar {
+            background-color: #FFFFFF;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .topbar h1 {
+            font-size: 1.45rem;
+            color: var(--texto-oscuro);
+        }
+
+        .topbar-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            font-size: 0.88rem;
+        }
+
+        .usuario-badge {
+            background-color: #FAF3E0;
+            border: 1px solid #F0E2D0;
+            color: var(--texto-oscuro);
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .reloj-sistema {
+            color: var(--texto-mutado);
+            font-weight: 500;
+        }
+
+        /* ÁREA DE TRABAJO (DASHBOARD) */
+        .workspace {
+            padding: 2rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* TARJETAS DE INDICADORES (KPIs) */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: #FFFFFF;
+            padding: 1.5rem;
+            border-radius: var(--radio);
+            box-shadow: var(--sombra-card);
+            border-left: 5px solid var(--azul-link);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .kpi-card.ingresos {
+            border-left-color: var(--verde-exito);
+        }
+
+        .kpi-card.alerta {
+            border-left-color: var(--rojo-alerta);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .kpi-header h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--texto-mutado);
+        }
+
+        .kpi-icono {
+            font-size: 1.5rem;
+        }
+
+        .kpi-valor {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--texto-oscuro);
+        }
+
+        .kpi-detalle {
+            font-size: 0.8rem;
+            color: var(--texto-mutado);
+            margin-top: 0.5rem;
+        }
+
+        /* TABLA DE PEDIDOS ENTRANTES */
+        .panel-tabla {
+            background: #FFFFFF;
+            border-radius: var(--radio);
+            padding: 1.8rem;
+            box-shadow: var(--sombra-card);
+            border: 1px solid var(--borde-suave);
+        }
+
+        .panel-tabla-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .panel-tabla-header h3 {
+            font-size: 1.15rem;
+            color: var(--texto-oscuro);
+        }
+
+        .link-ver-todos {
+            color: var(--azul-link);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .link-ver-todos:hover {
+            text-decoration: underline;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--borde-suave);
+        }
+
+        th {
+            background-color: #F8F9FA;
+            color: var(--texto-mutado);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background-color: #F8FAFC;
+        }
+
+        /* Insignias de Estado */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: inline-block;
+        }
+
+        .bg-nuevo { background-color: #FFF3CD; color: #856404; }
+        .bg-preparacion { background-color: #CCE5FF; color: #004085; }
+        .bg-listo { background-color: #D4EDDA; color: #155724; }
+        .bg-entregado { background-color: #E2E3E5; color: #383D41; }
+        .bg-cancelado { background-color: #F8D7DA; color: #721C24; }
+
+        /* Botones de Acción */
+        .acciones-fila {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-wa-accion {
+            background-color: var(--verde-exito);
+            color: #FFFFFF;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-wa-accion:hover {
+            background-color: var(--verde-hover);
+        }
+
+        .btn-detalles-accion {
+            background-color: var(--azul-link);
+            color: #FFFFFF;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-detalles-accion:hover {
+            background-color: var(--azul-hover);
+        }
+
+        /* Estado Vacío de la Tabla */
+        .tabla-vacia {
+            text-align: center;
+            padding: 2.5rem;
+            color: var(--texto-mutado);
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+                height: auto;
+                overflow: auto;
+            }
+            .sidebar {
+                width: 100%;
+            }
+            .workspace {
+                padding: 1.2rem;
+            }
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR DE NAVEGACIÓN ADMINISTRATIVA (SUBSISTEMA 2) -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>CARMIR ADMIN</h2>
+            <p>Delicias de Postres</p>
+        </div>
+
+        <ul class="menu-navegacion">
+            <li><a href="admin-dashboard.html" class="activo">📊 Dashboard Principal</a></li>
+            <li><a href="admin-pedidos.html">📝 Gestión de Pedidos</a></li>
+            <li><a href="admin-agenda.html">📅 Agenda de Producción</a></li>
+            <li id="nav-inventario"><a href="admin-inventario.html">📦 Control de Inventario</a></li>
+            <li id="nav-recetas"><a href="admin-recetas.html">🍰 Catálogo y Recetas</a></li>
+            <li id="nav-reportes"><a href="admin-reportes.html">📈 Reportes Financieros</a></li>
+            <li id="nav-usuarios"><a href="admin-usuarios.html">👥 Personal y Permisos</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button type="button" class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                🔒 Bloquear / Salir
+            </button>
+        </div>
+    </aside>
+
+    <!-- ÁREA DE CONTENIDO PRINCIPAL -->
+    <main class="contenido-area">
+        
+        <!-- BARRA SUPERIOR -->
+        <header class="topbar">
+            <h1>Panel de Control Operativo</h1>
+            <div class="topbar-info">
+                <span class="reloj-sistema" id="reloj-display">01 Octubre 2026 | 00:00:00</span>
+                <span class="usuario-badge" id="nombre-usuario-display">Admin: Cargando...</span>
+            </div>
+        </header>
+
+        <!-- DASHBOARD DE TRABAJO -->
+        <div class="workspace">
+            
+            <!-- TARJETAS DE INDICADORES CLAVE (KPIs) -->
+            <section class="kpi-grid">
+                
+                <!-- KPI 1: Pedidos del Día -->
+                <article class="kpi-card">
+                    <div class="kpi-header">
+                        <h3>Pedidos del Día</h3>
+                        <span class="kpi-icono">📦</span>
+                    </div>
+                    <div class="kpi-valor" id="kpi-pedidos-hoy">0</div>
+                    <div class="kpi-detalle" id="kpi-pedidos-detalle">0 pendientes de procesar</div>
+                </article>
+
+                <!-- KPI 2: Ingresos Estimados (Sensible / RBAC) -->
+                <article class="kpi-card ingresos" id="kpi-card-ingresos">
+                    <div class="kpi-header">
+                        <h3>Ingresos Estimados</h3>
+                        <span class="kpi-icono">💰</span>
+                    </div>
+                    <div class="kpi-valor" id="kpi-ingresos-total">$0.00</div>
+                    <div class="kpi-detalle" id="kpi-ingresos-subtexto">Monto acumulado en pedidos activos</div>
+                </article>
+
+                <!-- KPI 3: Alertas de Inventario Crítico -->
+                <article class="kpi-card alerta" id="kpi-card-alertas">
+                    <div class="kpi-header">
+                        <h3>Alertas de Inventario</h3>
+                        <span class="kpi-icono">⚠️</span>
+                    </div>
+                    <div class="kpi-valor" id="kpi-insumos-bajos" style="color: var(--rojo-alerta);">0 Insumos</div>
+                    <div class="kpi-detalle" id="kpi-insumos-nombres">Niveles de stock en óptimas condiciones</div>
+                </article>
+
+            </section>
+
+            <!-- TABLA DE PEDIDOS ENTRANTES -->
+            <section class="panel-tabla">
+                <div class="panel-tabla-header">
+                    <h3>Últimos Pedidos Registrados (Web y Mostrador)</h3>
+                    <a href="admin-pedidos.html" class="link-ver-todos">Ver todos los pedidos →</a>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Folio</th>
+                            <th>Cliente y Teléfono</th>
+                            <th>Postres Personalizados</th>
+                            <th>Total</th>
+                            <th>Estado Operativo</th>
+                            <th>Acciones Rápidas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-pedidos-cuerpo">
+                        <!-- Renderizado dinámico -->
+                    </tbody>
+                </table>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- LÓGICA DE CONTROL, SESIÓN Y CONSUMO DE DATOS -->
+    <script>
+        // Semilla base de Inventario si no existe en localStorage
+        function inicializarInventarioSemilla() {
+            if (!localStorage.getItem('carmir_inventario')) {
+                const inventarioInicial = [
+                    { id: "INS-001", nombre: "Harina de Trigo (Fina)", categoria: "Abarrotes", stockActual: 12.5, stockMinimo: 5.0, unidad: "Kg", precioUnitario: 18.00 },
+                    { id: "INS-002", nombre: "Azúcar Refinada", categoria: "Abarrotes", stockActual: 8.0, stockMinimo: 4.0, unidad: "Kg", precioUnitario: 26.00 },
+                    { id: "INS-003", nombre: "Fresa Natural (Fuerte)", categoria: "Frutas Frescas", stockActual: 0.5, stockMinimo: 2.0, unidad: "Kg", precioUnitario: 75.00 },
+                    { id: "INS-004", nombre: "Nuez Picada", categoria: "Semillas", stockActual: 0.2, stockMinimo: 1.0, unidad: "Kg", precioUnitario: 220.00 },
+                    { id: "INS-005", nombre: "Leche Entera", categoria: "Lácteos", stockActual: 15.0, stockMinimo: 5.0, unidad: "Litros", precioUnitario: 24.00 },
+                    { id: "INS-006", nombre: "Huevo Blanco", categoria: "Frescos", stockActual: 180, stockMinimo: 60, unidad: "Piezas", precioUnitario: 3.50 },
+                    { id: "INS-007", nombre: "Chocolate Semi-Amargo", categoria: "Repostería", stockActual: 4.5, stockMinimo: 2.0, unidad: "Kg", precioUnitario: 140.00 }
+                ];
+                localStorage.setItem('carmir_inventario', JSON.stringify(inventarioInicial));
+            }
+        }
+
+        // Semilla base de Pedidos si no existe
+        function inicializarPedidosSemilla() {
+            if (!localStorage.getItem('carmir_pedidos')) {
+                const pedidosIniciales = [
+                    {
+                        folio: "#FOL-2026-1042",
+                        fechaCreacion: new Date(Date.now() - 15 * 60000).toISOString(),
+                        cliente: { nombre: "Ana María López", telefono: "5551234567", correo: "ana.lopez@email.com" },
+                        entrega: { modalidad: "Recoger en Sucursal", fechaHoraEsperada: "2026-10-02T14:30" },
+                        pago: { modalidad: "Efectivo al entregar", montoTotal: 660.00, montoPagado: 0.00, saldoPendiente: 660.00, estadoValidacion: "Falta de Cobro" },
+                        estado: "Pendiente",
+                        productos: [
+                            { nombre: "Pastel de Tres Leches", tamano: "Mediano (15-20 pax)", precio: 480.00, cantidad: 1, dedicatoria: "¡Feliz Cumpleaños Mamá!" },
+                            { nombre: "Gelatina de Mosaico", tamano: "Grande", precio: 180.00, cantidad: 1, dedicatoria: "" }
+                        ]
+                    },
+                    {
+                        folio: "#FOL-2026-1041",
+                        fechaCreacion: new Date(Date.now() - 2 * 3600000).toISOString(),
+                        cliente: { nombre: "Carlos Ramírez", telefono: "5559876543", correo: "carlos.r@email.com" },
+                        entrega: { modalidad: "A Domicilio", fechaHoraEsperada: "2026-10-02T16:00" },
+                        pago: { modalidad: "Transferencia", montoTotal: 300.00, montoPagado: 300.00, saldoPendiente: 0.00, estadoValidacion: "Confirmado" },
+                        estado: "En preparación",
+                        productos: [
+                            { nombre: "Brownies Clásicos", tamano: "Caja de 6 piezas", precio: 150.00, cantidad: 2, dedicatoria: "" }
+                        ]
+                    },
+                    {
+                        folio: "#FOL-2026-1040",
+                        fechaCreacion: new Date(Date.now() - 4 * 3600000).toISOString(),
+                        cliente: { nombre: "Laura Gómez", telefono: "5554567890", correo: "laura.g@email.com" },
+                        entrega: { modalidad: "Recoger en Sucursal", fechaHoraEsperada: "2026-10-02T18:00" },
+                        pago: { modalidad: "Transferencia", montoTotal: 320.00, montoPagado: 160.00, saldoPendiente: 160.00, estadoValidacion: "Confirmado" },
+                        estado: "En preparación",
+                        productos: [
+                            { nombre: "Pastel Imposible", tamano: "Chico (10 pax)", precio: 320.00, cantidad: 1, dedicatoria: "" }
+                        ]
+                    }
+                ];
+                localStorage.setItem('carmir_pedidos', JSON.stringify(pedidosIniciales));
+            }
+        }
+
+        // Validación de Sesión y Restricción por Roles (RBAC / Singleton)
+        function validarSesion() {
+            const sesion = JSON.parse(localStorage.getItem('carmir_sesion_activa'));
+            if (!sesion) {
+                window.location.href = "admin-login.html";
+                return null;
+            }
+
+            // Desplegar información en cabecera
+            const labelUsuario = document.getElementById('nombre-usuario-display');
+            labelUsuario.textContent = `${sesion.rol}: ${sesion.nombre}`;
+
+            // Control granular de permisos para ocultar opciones no autorizadas
+            const permisos = sesion.permisos || [];
+
+            if (!permisos.includes('reportes_financieros')) {
+                const cardIngresos = document.getElementById('kpi-card-ingresos');
+                if (cardIngresos) cardIngresos.style.display = 'none';
+                const navReportes = document.getElementById('nav-reportes');
+                if (navReportes) navReportes.style.display = 'none';
+            }
+
+            if (!permisos.includes('inventario') && !permisos.includes('inventario_merma')) {
+                const navInv = document.getElementById('nav-inventario');
+                if (navInv) navInv.style.display = 'none';
+            }
+
+            if (!permisos.includes('recetas') && !permisos.includes('recetas_consulta')) {
+                const navRecetas = document.getElementById('nav-recetas');
+                if (navRecetas) navRecetas.style.display = 'none';
+            }
+
+            if (!permisos.includes('usuarios')) {
+                const navUsuarios = document.getElementById('nav-usuarios');
+                if (navUsuarios) navUsuarios.style.display = 'none';
+            }
+
+            return sesion;
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('carmir_sesion_activa');
+            window.location.href = "admin-login.html";
+        }
+
+        // Reloj del sistema en tiempo real
+        function iniciarReloj() {
+            const relojEl = document.getElementById('reloj-display');
+            function refrescar() {
+                const ahora = new Date();
+                relojEl.textContent = ahora.toLocaleDateString('es-MX', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                }) + ' | ' + ahora.toLocaleTimeString('es-MX');
+            }
+            refrescar();
+            setInterval(refrescar, 1000);
+        }
+
+        // Carga y cálculo de indicadores (KPIs)
+        function actualizarKPIs() {
+            const pedidos = JSON.parse(localStorage.getItem('carmir_pedidos')) || [];
+            const inventario = JSON.parse(localStorage.getItem('carmir_inventario')) || [];
+
+            // 1. Pedidos
+            const totalPedidos = pedidos.length;
+            const pendientes = pedidos.filter(p => p.estado.toLowerCase().includes('pendiente')).length;
+            document.getElementById('kpi-pedidos-hoy').textContent = totalPedidos;
+            document.getElementById('kpi-pedidos-detalle').textContent = `${pendientes} pendientes de procesar`;
+
+            // 2. Ingresos Estimados
+            const sumaTotal = pedidos
+                .filter(p => !p.estado.toLowerCase().includes('cancelado'))
+                .reduce((acc, p) => acc + (p.pago.montoTotal || 0), 0);
+            document.getElementById('kpi-ingresos-total').textContent = `$${sumaTotal.toFixed(2)}`;
+
+            // 3. Alertas de Inventario Crítico
+            const insumosCriticos = inventario.filter(i => i.stockActual <= i.stockMinimo);
+            const kpiAlertasValor = document.getElementById('kpi-insumos-bajos');
+            const kpiAlertasSubtexto = document.getElementById('kpi-insumos-nombres');
+
+            if (insumosCriticos.length > 0) {
+                kpiAlertasValor.textContent = `${insumosCriticos.length} Insumos bajos`;
+                const nombres = insumosCriticos.map(i => i.nombre).join(', ');
+                kpiAlertasSubtexto.textContent = `Atención: (${nombres})`;
+            } else {
+                kpiAlertasValor.textContent = "0 Insumos";
+                kpiAlertasValor.style.color = "var(--verde-exito)";
+                kpiAlertasSubtexto.textContent = "Niveles de materia prima óptimos";
+            }
+        }
+
+        // Renderizado de tabla de pedidos
+        function renderizarTablaPedidos() {
+            const pedidos = JSON.parse(localStorage.getItem('carmir_pedidos')) || [];
+            const tbody = document.getElementById('tabla-pedidos-cuerpo');
+            tbody.innerHTML = '';
+
+            if (pedidos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="tabla-vacia">No hay pedidos entrantes en este momento.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Mostrar los 5 más recientes
+            const recientes = pedidos.slice(0, 5);
+
+            recientes.forEach(p => {
+                const tr = document.createElement('tr');
+
+                // Resumen de productos
+                const prodsTexto = p.productos.map(item => `${item.cantidad || 1}x ${item.nombre}`).join('<br>');
+
+                // Badge de estado
+                let claseBadge = 'bg-nuevo';
+                const est = p.estado.toLowerCase();
+                if (est.includes('prep')) claseBadge = 'bg-preparacion';
+                else if (est.includes('listo')) claseBadge = 'bg-listo';
+                else if (est.includes('entreg')) claseBadge = 'bg-entregado';
+                else if (est.includes('cancel')) claseBadge = 'bg-cancelado';
+
+                // URL mensaje de WhatsApp
+                const msg = `Hola ${p.cliente.nombre}, te saludamos de Repostería CARMIR con respecto a tu pedido ${p.folio}. ¿Podríamos confirmar los detalles de entrega?`;
+                const waUrl = `https://wa.me/${p.cliente.telefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`;
+
+                tr.innerHTML = `
+                    <td><strong>${p.folio}</strong></td>
+                    <td>
+                        <strong>${p.cliente.nombre}</strong><br>
+                        <span style="font-size:0.8rem; color:var(--texto-mutado);">Tel: ${p.cliente.telefono}</span>
+                    </td>
+                    <td><div style="font-size:0.85rem;">${prodsTexto}</div></td>
+                    <td><strong>$${(p.pago.montoTotal || 0).toFixed(2)}</strong></td>
+                    <td><span class="badge ${claseBadge}">${p.estado}</span></td>
+                    <td>
+                        <div class="acciones-fila">
+                            <a href="${waUrl}" target="_blank" class="btn-wa-accion" title="Notificar por WhatsApp">
+                                💬 WhatsApp
+                            </a>
+                            <a href="admin-pedidos.html?folio=${encodeURIComponent(p.folio)}" class="btn-detalles-accion">
+                                Ver Detalles
+                            </a>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            validarSesion();
+            inicializarInventarioSemilla();
+            inicializarPedidosSemilla();
+            iniciarReloj();
+            actualizarKPIs();
+            renderizarTablaPedidos();
+        });
+    </script>
+</body>
+</html>

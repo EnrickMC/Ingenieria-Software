@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARMIR Admin - Agenda de Producción</title>
+    <style>
+        :root {
+            --bg-software: #EEF2F5;
+            --sidebar-fondo: #2C3E50;
+            --sidebar-header: #1A252F;
+            --sidebar-hover: #34495E;
+            --acento-canela: #D4A373;
+            --acento-dorado: #D29D6A;
+            --verde-exito: #2ECC71;
+            --azul-link: #3498DB;
+            --azul-hover: #2980B9;
+            --rojo-alerta: #E74C3C;
+            --amarillo-aviso: #F39C12;
+            --morado-bloque: #9B59B6;
+            --texto-oscuro: #2C3E50;
+            --texto-mutado: #7F8C8D;
+            --borde-suave: #ECF0F1;
+            --fuente-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --radio: 8px;
+            --sombra-card: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente-base);
+            background-color: var(--bg-software);
+            color: var(--texto-oscuro);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* BARRA LATERAL (SIDEBAR) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-fondo);
+            color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1.2rem;
+            background-color: var(--sidebar-header);
+            text-align: center;
+            border-bottom: 1px solid var(--sidebar-hover);
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            color: var(--acento-canela);
+            letter-spacing: 1.5px;
+        }
+
+        .sidebar-header p {
+            margin: 4px 0 0;
+            font-size: 0.75rem;
+            color: #BDC3C7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-navegacion {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-navegacion li {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-navegacion a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #ECF0F1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .menu-navegacion a:hover,
+        .menu-navegacion a.activo {
+            background-color: var(--sidebar-hover);
+            border-left: 4px solid var(--acento-canela);
+            color: #FFFFFF;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            background-color: var(--sidebar-header);
+            border-top: 1px solid var(--sidebar-hover);
+        }
+
+        .btn-cerrar-sesion {
+            width: 100%;
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #E74C3C;
+            border: 1px solid #E74C3C;
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cerrar-sesion:hover {
+            background-color: #E74C3C;
+            color: #FFFFFF;
+        }
+
+        /* ÁREA DE CONTENIDO */
+        .contenido-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            background-color: #FFFFFF;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .topbar h1 {
+            font-size: 1.45rem;
+            color: var(--texto-oscuro);
+        }
+
+        .usuario-badge {
+            background-color: #FAF3E0;
+            border: 1px solid #F0E2D0;
+            color: var(--texto-oscuro);
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* ESPACIO DE TRABAJO DEL CALENDARIO */
+        .workspace-agenda {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        /* BARRA DE HERRAMIENTAS DE LA AGENDA */
+        .agenda-toolbar {
+            background: #FFFFFF;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radio);
+            box-shadow: var(--sombra-card);
+            border: 1px solid var(--borde-suave);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .controles-navegacion {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .btn-nav-fecha {
+            background: #F8F9FA;
+            border: 1px solid #BDC3C7;
+            padding: 0.5rem 0.9rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--texto-oscuro);
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav-fecha:hover {
+            background-color: #E2E6E8;
+        }
+
+        .etiqueta-periodo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--texto-oscuro);
+            min-width: 230px;
+        }
+
+        .botones-vistas {
+            display: flex;
+            background-color: #F8F9FA;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--borde-suave);
+            gap: 4px;
+        }
+
+        .btn-vista {
+            border: none;
+            background: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--texto-mutado);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-vista.activo {
+            background-color: #FFFFFF;
+            color: var(--sidebar-fondo);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        /* LEYENDA DE ESTADOS DE AUTORIZACIÓN (RF-27) */
+        .leyenda-estados {
+            display: flex;
+            gap: 1.2rem;
+            align-items: center;
+            font-size: 0.82rem;
+            color: var(--texto-mutado);
+            flex-wrap: wrap;
+        }
+
+        .item-leyenda {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot-leyenda {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* CONTENEDORES DE LAS VISTAS */
+        .panel-calendario {
+            background: #FFFFFF;
+            border-radius: var(--radio);
+            box-shadow: var(--sombra-card);
+            border: 1px solid var(--borde-suave);
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            min-height: 550px;
+        }
+
+        /* ================= VISTA MENSUAL ================= */
+        .calendario-mes-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .dia-nombre-header {
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--texto-mutado);
+            padding: 0.5rem 0;
+            text-transform: uppercase;
+            background-color: #F8F9FA;
+            border-radius: 4px;
+        }
+
+        .celda-dia-mes {
+            background-color: #FAFAFB;
+            border: 1px solid var(--borde-suave);
+            border-radius: 6px;
+            min-height: 110px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: background-color 0.15s ease;
+        }
+
+        .celda-dia-mes:hover {
+            background-color: #F4F6F7;
+        }
+
+        .celda-dia-mes.otro-mes {
+            opacity: 0.4;
+            background-color: #FDFDFD;
+        }
+
+        .celda-dia-mes.hoy {
+            border: 2px solid var(--acento-canela);
+            background-color: #FFFDF9;
+        }
+
+        .numero-dia {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--texto-oscuro);
+            margin-bottom: 4px;
+        }
+
+        .evento-pedido-chip {
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: transform 0.1s ease;
+        }
+
+        .evento-pedido-chip:hover {
+            transform: scale(1.02);
+            filter: brightness(0.95);
+        }
+
+        /* ================= VISTA SEMANAL ================= */
+        .calendario-semana-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            min-height: 500px;
+        }
+
+        .columna-dia-semana {
+            background-color: #F8F9FA;
+            border: 1px solid var(--borde-suave);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .columna-semana-header {
+            padding: 10px;
+            text-align: center;
+            background-color: #FFFFFF;
+            border-bottom: 2px solid var(--borde-suave);
+        }
+
+        .columna-semana-header.dia-actual {
+            border-bottom-color: var(--acento-canela);
+            background-color: #FFFDF9;
+        }
+
+        .semana-dia-titulo { font-weight: 700; font-size: 0.9rem; color: var(--texto-oscuro); }
+        .semana-fecha-sub { font-size: 0.75rem; color: var(--texto-mutado); }
+
+        .cuerpo-columna-semana {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Tarjeta de Pedido en Semana / Día */
+        .tarjeta-agenda-pedido {
+            background-color: #FFFFFF;
+            border-left: 4px solid #BDC3C7;
+            border-radius: 6px;
+            padding: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.82rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tarjeta-agenda-pedido:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* ================= VISTA DIARIA (HORA POR HORA) ================= */
+        .agenda-diaria-tabla {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .agenda-diaria-tabla tr {
+            border-bottom: 1px solid var(--borde-suave);
+        }
+
+        .columna-hora {
+            width: 90px;
+            padding: 14px 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--texto-mutado);
+            text-align: right;
+            vertical-align: top;
+            border-right: 2px solid var(--borde-suave);
+            background-color: #F8F9FA;
+        }
+
+        .columna-turnos-pedidos {
+            padding: 8px 14px;
+            vertical-align: top;
+            min-height: 50px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* CLASES DE COLORES POR ESTADO DE PRODUCCIÓN (RF-27) */
+        .estado-bloqueado {
+            background-color: #FDEDEC !important;
+            border-left-color: var(--rojo-alerta) !important;
+            color: #922B21 !important;
+        }
+
+        .chip-bloqueado {
+            background-color: var(--rojo-alerta) !important;
+        }
+
+        .estado-preparacion {
+            background-color: #EBF5FB !important;
+            border-left-color: var(--azul-link) !important;
+            color: #1B4F72 !important;
+        }
+
+        .chip-preparacion {
+            background-color: var(--azul-link) !important;
+        }
+
+        .estado-listo {
+            background-color: #EAFAF1 !important;
+            border-left-color: var(--verde-exito) !important;
+            color: #196F3D !important;
+        }
+
+        .chip-listo {
+            background-color: var(--verde-exito) !important;
+        }
+
+        .estado-aprobado {
+            background-color: #FEF9E7 !important;
+            border-left-color: var(--amarillo-aviso) !important;
+            color: #7D6608 !important;
+        }
+
+        .chip-aprobado {
+            background-color: var(--amarillo-aviso) !important;
+        }
+
+        /* MODAL DE DETALLE RÁPIDO DE PRODUCCIÓN */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.activo { display: flex; }
+
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: var(--radio);
+            width: 100%;
+            max-width: 480px;
+            padding: 1.8rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            animation: modalFade 0.2s ease;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--borde-suave);
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .modal-header-box h3 {
+            font-size: 1.3rem;
+            color: var(--texto-oscuro);
+        }
+
+        .btn-cerrar-modal {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--texto-mutado);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-info-fila {
+            margin-bottom: 0.6rem;
+            font-size: 0.88rem;
+        }
+
+        .modal-info-fila strong {
+            color: var(--texto-oscuro);
+        }
+
+        .lista-postres-modal {
+            background-color: #FAF6F0;
+            border: 1px solid var(--borde-suave);
+            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            list-style: none;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .lista-postres-modal li {
+            margin-bottom: 0.4rem;
+        }
+
+        .modal-acciones {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .btn-ir-pedido {
+            background-color: var(--azul-link);
+            color: #FFFFFF;
+            text-decoration: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .btn-ir-pedido:hover {
+            background-color: var(--azul-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MENÚ LATERAL -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>CARMIR ADMIN</h2>
+            <p>Delicias de Postres</p>
+        </div>
+
+        <ul class="menu-navegacion">
+            <li><a href="admin-dashboard.html">📊 Dashboard Principal</a></li>
+            <li><a href="admin-pedidos.html">📝 Gestión de Pedidos</a></li>
+            <li><a href="admin-agenda.html" class="activo">📅 Agenda de Producción</a></li>
+            <li id="nav-inventario"><a href="admin-inventario.html">📦 Control de Inventario</a></li>
+            <li id="nav-recetas"><a href="admin-recetas.html">🍰 Catálogo y Recetas</a></li>
+            <li id="nav-reportes"><a href="admin-reportes.html">📈 Reportes Financieros</a></li>
+            <li id="nav-usuarios"><a href="admin-usuarios.html">👥 Personal y Permisos</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button type="button" class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                🔒 Bloquear / Salir
+            </button>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido-area">
+        
+        <header class="topbar">
+            <h1>Agenda y Calendario de Producción</h1>
+            <div class="usuario-badge" id="sesion-usuario-display">Admin: Cargando...</div>
+        </header>
+
+        <div class="workspace-agenda">
+            
+            <!-- TOOLBAR DE NAVEGACIÓN Y VISTAS (RF-30) -->
+            <div class="agenda-toolbar">
+                <div class="controles-navegacion">
+                    <button type="button" class="btn-nav-fecha" onclick="cambiarPeriodo(-1)">◀</button>
+                    <button type="button" class="btn-nav-fecha" onclick="irHoy()">Hoy</button>
+                    <button type="button" class="btn-nav-fecha" onclick="cambiarPeriodo(1)">▶</button>
+                    <span class="etiqueta-periodo" id="label-periodo-actual">Octubre 2026</span>
+                </div>
+
+                <div class="botones-vistas">
+                    <button type="button" class="btn-vista" id="btn-vista-dia" onclick="cambiarVista('dia')">Día</button>
+                    <button type="button" class="btn-vista" id="btn-vista-semana" onclick="cambiarVista('semana')">Semana</button>
+                    <button type="button" class="btn-vista activo" id="btn-vista-mes" onclick="cambiarVista('mes')">Mes</button>
+                </div>
+
+                <div class="leyenda-estados">
+                    <div class="item-leyenda">
+                        <div class="dot-leyenda" style="background-color: var(--azul-link);"></div>
+                        <span>En Preparación</span>
+                    </div>
+                    <div class="item-leyenda">
+                        <div class="dot-leyenda" style="background-color: var(--amarillo-aviso);"></div>
+                        <span>Aprobado</span>
+                    </div>
+                    <div class="item-leyenda">
+                        <div class="dot-leyenda" style="background-color: var(--rojo-alerta);"></div>
+                        <span>Bloqueado por Pago (RF-27)</span>
+                    </div>
+                    <div class="item-leyenda">
+                        <div class="dot-leyenda" style="background-color: var(--verde-exito);"></div>
+                        <span>Listo para Entrega</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENEDOR DINÁMICO DE CALENDARIO -->
+            <div class="panel-calendario" id="contenedor-vista-calendario">
+                <!-- Se inyecta la vista seleccionada (Mes, Semana o Día) -->
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- MODAL DETALLE DE PRODUCCIÓN -->
+    <div id="modal-detalle-agenda" class="modal-overlay" onclick="cerrarModalFondo(event)">
+        <div class="modal-card">
+            <div class="modal-header-box">
+                <div>
+                    <h3 id="mdl-folio">#FOL-2026-0000</h3>
+                    <span id="mdl-estado-badge" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Estado</span>
+                </div>
+                <button type="button" class="btn-cerrar-modal" onclick="cerrarModalDetalle()">&times;</button>
+            </div>
+
+            <div class="modal-info-fila">
+                <strong>Cliente:</strong> <span id="mdl-cliente">-</span>
+            </div>
+            <div class="modal-info-fila">
+                <strong>Hora Límite de Entrega:</strong> <span id="mdl-hora-entrega">-</span>
+            </div>
+            <div class="modal-info-fila">
+                <strong>Modalidad:</strong> <span id="mdl-modalidad">-</span>
+            </div>
+            <div class="modal-info-fila">
+                <strong>Autorización de Producción (RF-27):</strong> <span id="mdl-autorizacion">-</span>
+            </div>
+
+            <ul class="lista-postres-modal" id="mdl-lista-postres">
+                <!-- Inyectado dinámicamente -->
+            </ul>
+
+            <div class="modal-acciones">
+                <button type="button" class="btn-nav-fecha" onclick="cerrarModalDetalle()">Cerrar</button>
+                <a id="mdl-link-ir" href="#" class="btn-ir-pedido">Ver en Gestión de Pedidos →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- LÓGICA DE CONTROL DEL CALENDARIO -->
+    <script>
+        let fechaPivote = new Date(2026, 9, 1); // 01 Octubre 2026
+        let vistaActual = 'mes'; // 'mes', 'semana', 'dia'
+        let pedidos = [];
+
+        // Validar sesión
+        function validarSesion() {
+            const sesion = JSON.parse(localStorage.getItem('carmir_sesion_activa'));
+            if (!sesion) {
+                window.location.href = "admin-login.html";
+                return;
+            }
+            document.getElementById('sesion-usuario-display').textContent = `${sesion.rol}: ${sesion.nombre}`;
+
+            const permisos = sesion.permisos || [];
+            if (!permisos.includes('reportes_financieros')) {
+                const el = document.getElementById('nav-reportes');
+                if (el) el.style.display = 'none';
+            }
+            if (!permisos.includes('inventario') && !permisos.includes('inventario_merma')) {
+                const el = document.getElementById('nav-inventario');
+                if (el) el.style.display = 'none';
+            }
+            if (!permisos.includes('recetas') && !permisos.includes('recetas_consulta')) {
+                const el = document.getElementById('nav-recetas');
+                if (el) el.style.display = 'none';
+            }
+            if (!permisos.includes('usuarios')) {
+                const el = document.getElementById('nav-usuarios');
+                if (el) el.style.display = 'none';
+            }
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('carmir_sesion_activa');
+            window.location.href = "admin-login.html";
+        }
+
+        function cargarPedidos() {
+            pedidos = JSON.parse(localStorage.getItem('carmir_pedidos')) || [];
+
+            // Si hay pedidos guardados, centrar la vista en el mes del pedido más reciente
+            if (pedidos.length > 0) {
+                const pedidoConFecha = pedidos.find(p => p.entrega && p.entrega.fechaHoraEsperada);
+                if (pedidoConFecha) {
+                    const parsedDate = new Date(pedidoConFecha.entrega.fechaHoraEsperada);
+                    if (!isNaN(parsedDate.getTime())) {
+                        fechaPivote = parsedDate;
+                    }
+                }
+            }
+            renderizarVista();
+        }
+
+        // Determinar estilo de estado para el pedido
+        function obtenerClaseEstado(pedido) {
+            if (!pedido) {
+                return { card: 'estado-aprobado', chip: 'chip-aprobado', etiqueta: 'Registrado' };
+            }
+
+            const estado = (pedido.estado || 'Pendiente').toLowerCase();
+            const pago = pedido.pago || {};
+            const pagoValido = (pago.estadoValidacion === 'Confirmado') || ((pago.montoPagado || 0) > 0);
+
+            if (estado === 'pendiente' && !pagoValido) {
+                return { card: 'estado-bloqueado', chip: 'chip-bloqueado', etiqueta: 'Bloqueado por Pago (RF-27)' };
+            }
+            if (estado.includes('prep')) {
+                return { card: 'estado-preparacion', chip: 'chip-preparacion', etiqueta: 'En Preparación' };
+            }
+            if (estado.includes('listo')) {
+                return { card: 'estado-listo', chip: 'chip-listo', etiqueta: 'Listo' };
+            }
+            return { card: 'estado-aprobado', chip: 'chip-aprobado', etiqueta: pedido.estado || 'Aprobado' };
+        }
+
+        // ================= RENDERIZADO DE VISTAS (RF-30) =================
+        function cambiarVista(vista) {
+            vistaActual = vista;
+            document.querySelectorAll('.btn-vista').forEach(b => b.classList.remove('activo'));
+            const btn = document.getElementById(`btn-vista-${vista}`);
+            if (btn) btn.classList.add('activo');
+            renderizarVista();
+        }
+
+        function cambiarPeriodo(delta) {
+            if (vistaActual === 'mes') {
+                fechaPivote.setMonth(fechaPivote.getMonth() + delta);
+            } else if (vistaActual === 'semana') {
+                fechaPivote.setDate(fechaPivote.getDate() + (delta * 7));
+            } else if (vistaActual === 'dia') {
+                fechaPivote.setDate(fechaPivote.getDate() + delta);
+            }
+            renderizarVista();
+        }
+
+        function irHoy() {
+            fechaPivote = new Date(2026, 9, 1);
+            renderizarVista();
+        }
+
+        function renderizarVista() {
+            const contenedor = document.getElementById('contenedor-vista-calendario');
+            if (!contenedor) return;
+            contenedor.innerHTML = '';
+
+            if (vistaActual === 'mes') {
+                renderizarVistaMes(contenedor);
+            } else if (vistaActual === 'semana') {
+                renderizarVistaSemana(contenedor);
+            } else if (vistaActual === 'dia') {
+                renderizarVistaDia(contenedor);
+            }
+        }
+
+        // 1. VISTA MENSUAL
+        function renderizarVistaMes(contenedor) {
+            const anio = fechaPivote.getFullYear();
+            const mes = fechaPivote.getMonth();
+
+            const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            document.getElementById('label-periodo-actual').textContent = `${nombresMeses[mes]} ${anio}`;
+
+            const grid = document.createElement('div');
+            grid.className = 'calendario-mes-grid';
+
+            // Cabeceras días
+            const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+            diasSemana.forEach(d => {
+                const header = document.createElement('div');
+                header.className = 'dia-nombre-header';
+                header.textContent = d;
+                grid.appendChild(header);
+            });
+
+            // Primer día del mes (Ajustado Lun = 0)
+            const primerDiaIndex = (new Date(anio, mes, 1).getDay() + 6) % 7;
+            const diasTotalesMes = new Date(anio, mes + 1, 0).getDate();
+            const diasMesAnterior = new Date(anio, mes, 0).getDate();
+
+            // Celdas del mes anterior
+            for (let i = primerDiaIndex - 1; i >= 0; i--) {
+                const celda = document.createElement('div');
+                celda.className = 'celda-dia-mes otro-mes';
+                celda.innerHTML = `<span class="numero-dia">${diasMesAnterior - i}</span>`;
+                grid.appendChild(celda);
+            }
+
+            // Celdas del mes actual
+            for (let dia = 1; dia <= diasTotalesMes; dia++) {
+                const celda = document.createElement('div');
+                celda.className = 'celda-dia-mes';
+
+                const fechaIsoDia = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+
+                if (dia === 1 && mes === 9 && anio === 2026) {
+                    celda.classList.add('hoy');
+                }
+
+                celda.innerHTML = `<span class="numero-dia">${dia}</span>`;
+
+                // Buscar pedidos cuya entrega coincida con este día
+                const pedidosDelDia = pedidos.filter(p => p.entrega && p.entrega.fechaHoraEsperada && p.entrega.fechaHoraEsperada.startsWith(fechaIsoDia));
+
+                pedidosDelDia.forEach(p => {
+                    const estilo = obtenerClaseEstado(p);
+                    const horaStr = p.entrega.fechaHoraEsperada.split('T')[1] || '';
+                    const chip = document.createElement('div');
+                    chip.className = `evento-pedido-chip ${estilo.chip}`;
+                    chip.innerHTML = `<span>⏰ ${horaStr}</span> <strong>${p.folio || '#FOL'}</strong>`;
+                    chip.onclick = () => abrirModalDetalle(p);
+                    celda.appendChild(chip);
+                });
+
+                grid.appendChild(celda);
+            }
+
+            contenedor.appendChild(grid);
+        }
+
+        // 2. VISTA SEMANAL
+        function renderizarVistaSemana(contenedor) {
+            const inicioSemana = new Date(fechaPivote);
+            const diaSemanaIndex = (inicioSemana.getDay() + 6) % 7;
+            inicioSemana.setDate(inicioSemana.getDate() - diaSemanaIndex);
+
+            const finSemana = new Date(inicioSemana);
+            finSemana.setDate(finSemana.getDate() + 6);
+
+            document.getElementById('label-periodo-actual').textContent = 
+                `${inicioSemana.getDate()} ${inicioSemana.toLocaleDateString('es-MX', {month:'short'})} - ${finSemana.getDate()} ${finSemana.toLocaleDateString('es-MX', {month:'short', year:'numeric'})}`;
+
+            const grid = document.createElement('div');
+            grid.className = 'calendario-semana-grid';
+
+            for (let i = 0; i < 7; i++) {
+                const fechaColumna = new Date(inicioSemana);
+                fechaColumna.setDate(fechaColumna.getDate() + i);
+
+                const col = document.createElement('div');
+                col.className = 'columna-dia-semana';
+
+                const esHoy = fechaColumna.toDateString() === new Date(2026, 9, 1).toDateString();
+
+                col.innerHTML = `
+                    <div class="columna-semana-header ${esHoy ? 'dia-actual' : ''}">
+                        <div class="semana-dia-titulo">${fechaColumna.toLocaleDateString('es-MX', {weekday: 'short'}).toUpperCase()}</div>
+                        <div class="semana-fecha-sub">${fechaColumna.getDate()} ${fechaColumna.toLocaleDateString('es-MX', {month: 'short'})}</div>
+                    </div>
+                    <div class="cuerpo-columna-semana" id="semana-col-${i}"></div>
+                `;
+
+                grid.appendChild(col);
+
+                // Agregar pedidos a esta columna
+                const fechaIso = fechaColumna.toISOString().split('T')[0];
+                const pedidosDia = pedidos.filter(p => p.entrega && p.entrega.fechaHoraEsperada && p.entrega.fechaHoraEsperada.startsWith(fechaIso));
+
+                const cuerpo = col.querySelector(`#semana-col-${i}`);
+                if (pedidosDia.length === 0) {
+                    cuerpo.innerHTML = `<span style="font-size:0.75rem; color:var(--texto-mutado); text-align:center; margin-top:20px;">Sin órdenes</span>`;
+                } else {
+                    pedidosDia.forEach(p => {
+                        const estilo = obtenerClaseEstado(p);
+                        const card = document.createElement('div');
+                        card.className = `tarjeta-agenda-pedido ${estilo.card}`;
+                        const productosResumen = (p.productos || []).map(it => it.nombre).join(', ');
+                        const clienteNombre = (p.cliente && p.cliente.nombre) ? p.cliente.nombre : (p.cliente || 'Cliente');
+                        const horaStr = (p.entrega.fechaHoraEsperada.split('T')[1] || '');
+
+                        card.innerHTML = `
+                            <strong>${p.folio} - ⏰ ${horaStr}</strong>
+                            <div>${clienteNombre}</div>
+                            <div style="font-size:0.75rem; opacity:0.85;">${productosResumen}</div>
+                        `;
+                        card.onclick = () => abrirModalDetalle(p);
+                        cuerpo.appendChild(card);
+                    });
+                }
+            }
+
+            contenedor.appendChild(grid);
+        }
+
+        // 3. VISTA DIARIA (HORA POR HORA)
+        function renderizarVistaDia(contenedor) {
+            document.getElementById('label-periodo-actual').textContent = 
+                fechaPivote.toLocaleDateString('es-MX', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+            const fechaIso = fechaPivote.toISOString().split('T')[0];
+            const pedidosDia = pedidos.filter(p => p.entrega && p.entrega.fechaHoraEsperada && p.entrega.fechaHoraEsperada.startsWith(fechaIso));
+
+            const tabla = document.createElement('table');
+            tabla.className = 'agenda-diaria-tabla';
+
+            // Bloques de 08:00 a 20:00
+            for (let h = 8; h <= 20; h++) {
+                const horaLabel = `${String(h).padStart(2, '0')}:00`;
+                const tr = document.createElement('tr');
+
+                const tdHora = document.createElement('td');
+                tdHora.className = 'columna-hora';
+                tdHora.textContent = horaLabel;
+
+                const tdTurno = document.createElement('td');
+                tdTurno.className = 'columna-turnos-pedidos';
+
+                // Buscar pedidos cuya hora estimada coincida con este bloque
+                const pedidosEnHora = pedidosDia.filter(p => {
+                    if (!p.entrega || !p.entrega.fechaHoraEsperada) return false;
+                    const partes = p.entrega.fechaHoraEsperada.split('T');
+                    if (partes.length < 2) return false;
+                    const horaPedido = parseInt(partes[1].split(':')[0], 10);
+                    return horaPedido === h;
+                });
+
+                pedidosEnHora.forEach(p => {
+                    const estilo = obtenerClaseEstado(p);
+                    const card = document.createElement('div');
+                    card.className = `tarjeta-agenda-pedido ${estilo.card}`;
+                    card.style.minWidth = "280px";
+                    const clienteNombre = (p.cliente && p.cliente.nombre) ? p.cliente.nombre : (p.cliente || 'Cliente');
+                    const horaStr = (p.entrega.fechaHoraEsperada.split('T')[1] || '');
+                    const listaProductos = (p.productos || []).map(it => `${it.cantidad || 1}x ${it.nombre}`).join(', ');
+
+                    card.innerHTML = `
+                        <div style="display:flex; justify-content:space-between;">
+                            <strong>${p.folio}</strong>
+                            <span>${horaStr} hrs</span>
+                        </div>
+                        <div><strong>Cliente:</strong> ${clienteNombre}</div>
+                        <div><strong>Postres:</strong> ${listaProductos}</div>
+                        <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">${estilo.etiqueta}</div>
+                    `;
+                    card.onclick = () => abrirModalDetalle(p);
+                    tdTurno.appendChild(card);
+                });
+
+                tr.appendChild(tdHora);
+                tr.appendChild(tdTurno);
+                tabla.appendChild(tr);
+            }
+
+            contenedor.appendChild(tabla);
+        }
+
+        // ================= MODAL DE DETALLE (CORREGIDO Y REFORZADO) =================
+        function abrirModalDetalle(p) {
+            if (!p) return;
+
+            const estilo = obtenerClaseEstado(p);
+            
+            // Folio
+            const folioEl = document.getElementById('mdl-folio');
+            if (folioEl) folioEl.textContent = p.folio || '#FOL-0000';
+            
+            // Badge Estado
+            const badge = document.getElementById('mdl-estado-badge');
+            if (badge) {
+                badge.textContent = p.estado || 'Pendiente';
+                badge.className = `badge ${estilo.chip || ''}`;
+            }
+
+            // Datos Cliente
+            const clienteEl = document.getElementById('mdl-cliente');
+            if (clienteEl) {
+                const nombre = (p.cliente && p.cliente.nombre) ? p.cliente.nombre : (typeof p.cliente === 'string' ? p.cliente : 'Cliente General');
+                const tel = (p.cliente && p.cliente.telefono) ? ` (Tel: ${p.cliente.telefono})` : '';
+                clienteEl.textContent = `${nombre}${tel}`;
+            }
+
+            // Hora Entrega
+            const horaEl = document.getElementById('mdl-hora-entrega');
+            if (horaEl) {
+                if (p.entrega && p.entrega.fechaHoraEsperada) {
+                    horaEl.textContent = p.entrega.fechaHoraEsperada.replace('T', ' ') + ' hrs';
+                } else {
+                    horaEl.textContent = 'Por definir';
+                }
+            }
+
+            // Modalidad
+            const modalidadEl = document.getElementById('mdl-modalidad');
+            if (modalidadEl) {
+                modalidadEl.textContent = (p.entrega && p.entrega.modalidad) ? p.entrega.modalidad : 'Recolección en Mostrador';
+            }
+
+            // Autorización
+            const autEl = document.getElementById('mdl-autorizacion');
+            if (autEl) {
+                autEl.textContent = estilo.etiqueta || 'Autorizado';
+            }
+
+            // Lista de Postres
+            const lista = document.getElementById('mdl-lista-postres');
+            if (lista) {
+                lista.innerHTML = '';
+                const prods = Array.isArray(p.productos) ? p.productos : [];
+                if (prods.length === 0) {
+                    lista.innerHTML = '<li>Sin postres especificados.</li>';
+                } else {
+                    prods.forEach(it => {
+                        const li = document.createElement('li');
+                        const dedicatoria = it.dedicatoria ? `<br><em style="color:#B37D4E;">Dedicatoria: "${it.dedicatoria}"</em>` : '';
+                        li.innerHTML = `• <strong>${it.cantidad || 1}x ${it.nombre || 'Postre'}</strong> (${it.tamano || 'Estándar'}) ${dedicatoria}`;
+                        lista.appendChild(li);
+                    });
+                }
+            }
+
+            // Enlace directo a Gestión de Pedidos
+            const linkIr = document.getElementById('mdl-link-ir');
+            if (linkIr) {
+                linkIr.href = `admin-pedidos.html?folio=${encodeURIComponent(p.folio || '')}`;
+            }
+
+            // Abrir Modal
+            const modal = document.getElementById('modal-detalle-agenda');
+            if (modal) {
+                modal.classList.add('activo');
+            }
+        }
+
+        function cerrarModalDetalle() {
+            const modal = document.getElementById('modal-detalle-agenda');
+            if (modal) {
+                modal.classList.remove('activo');
+            }
+        }
+
+        function cerrarModalFondo(e) {
+            if (e.target && e.target.id === 'modal-detalle-agenda') {
+                cerrarModalDetalle();
+            }
+        }
+
+        // Atajo teclado Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarModalDetalle();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            validarSesion();
+            cargarPedidos();
+        });
+    </script>
+</body>
+</html>

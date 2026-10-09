@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARMIR Admin - Gestión de Personal y Permisos</title>
+    <style>
+        :root {
+            --bg-software: #EEF2F5;
+            --sidebar-fondo: #2C3E50;
+            --sidebar-header: #1A252F;
+            --sidebar-hover: #34495E;
+            --acento-canela: #D4A373;
+            --acento-dorado: #D29D6A;
+            --verde-exito: #2ECC71;
+            --verde-hover: #27AE60;
+            --azul-link: #3498DB;
+            --azul-hover: #2980B9;
+            --rojo-alerta: #E74C3C;
+            --amarillo-aviso: #F39C12;
+            --texto-oscuro: #2C3E50;
+            --texto-mutado: #7F8C8D;
+            --borde-suave: #ECF0F1;
+            --fuente-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --radio: 8px;
+            --sombra-card: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente-base);
+            background-color: var(--bg-software);
+            color: var(--texto-oscuro);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* BARRA LATERAL (SIDEBAR) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-fondo);
+            color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1.2rem;
+            background-color: var(--sidebar-header);
+            text-align: center;
+            border-bottom: 1px solid var(--sidebar-hover);
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            color: var(--acento-canela);
+            letter-spacing: 1.5px;
+        }
+
+        .sidebar-header p {
+            margin: 4px 0 0;
+            font-size: 0.75rem;
+            color: #BDC3C7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-navegacion {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-navegacion li {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-navegacion a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #ECF0F1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .menu-navegacion a:hover,
+        .menu-navegacion a.activo {
+            background-color: var(--sidebar-hover);
+            border-left: 4px solid var(--acento-canela);
+            color: #FFFFFF;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            background-color: var(--sidebar-header);
+            border-top: 1px solid var(--sidebar-hover);
+        }
+
+        .btn-cerrar-sesion {
+            width: 100%;
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #E74C3C;
+            border: 1px solid #E74C3C;
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cerrar-sesion:hover {
+            background-color: #E74C3C;
+            color: #FFFFFF;
+        }
+
+        /* ÁREA DE CONTENIDO */
+        .contenido-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            background-color: #FFFFFF;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .topbar h1 {
+            font-size: 1.45rem;
+            color: var(--texto-oscuro);
+        }
+
+        .usuario-badge {
+            background-color: #FAF3E0;
+            border: 1px solid #F0E2D0;
+            color: var(--texto-oscuro);
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* WORKSPACE DE USUARIOS */
+        .workspace-usuarios {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* TOOLBAR */
+        .toolbar-usuarios {
+            background: #FFFFFF;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radio);
+            box-shadow: var(--sombra-card);
+            border: 1px solid var(--borde-suave);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .buscador-caja {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .buscador-caja input {
+            width: 100%;
+            padding: 0.65rem 0.8rem 0.65rem 2rem;
+            border: 1px solid #BDC3C7;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            outline: none;
+            background-color: #FAF6F0;
+        }
+
+        .buscador-caja input:focus {
+            background-color: #FFFFFF;
+            border-color: var(--azul-link);
+        }
+
+        .buscador-caja::before {
+            content: '🔍';
+            position: absolute;
+            left: 0.65rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+
+        .btn-nuevo-usuario {
+            background-color: var(--verde-exito);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-nuevo-usuario:hover {
+            background-color: var(--verde-hover);
+        }
+
+        /* TABLA DE PERSONAL */
+        .contenedor-tabla-usuarios {
+            background: #FFFFFF;
+            border-radius: var(--radio);
+            box-shadow: var(--sombra-card);
+            border: 1px solid var(--borde-suave);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--borde-suave);
+        }
+
+        th {
+            background-color: #F8F9FA;
+            color: var(--texto-mutado);
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background-color: #F8FAFC;
+        }
+
+        /* BADGES */
+        .badge-rol {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .rol-admin { background-color: #FAF3E0; color: #8A6D23; border: 1px solid #EED7A1; }
+        .rol-personal { background-color: #EBF5FB; color: #1B4F72; border: 1px solid #AED6F1; }
+
+        .badge-estado {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .estado-activo { background-color: #EAFAF1; color: var(--verde-hover); }
+        .estado-inactivo { background-color: #FDEDEC; color: var(--rojo-alerta); }
+
+        .chips-permisos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            max-width: 380px;
+        }
+
+        .chip-permiso {
+            background-color: #F2F4F4;
+            color: var(--texto-oscuro);
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid #E5E8E8;
+        }
+
+        .chip-permiso.financiero {
+            background-color: #FEF9E7;
+            color: #7D6608;
+            border-color: #F9E79F;
+        }
+
+        .acciones-fila {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-accion-icono {
+            background: none;
+            border: 1px solid #DCD0C0;
+            padding: 5px 9px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.15s ease;
+        }
+
+        .btn-accion-icono:hover {
+            background-color: #F8F9FA;
+            border-color: var(--texto-oscuro);
+        }
+
+        .btn-inhabilitar {
+            color: var(--rojo-alerta);
+        }
+
+        .btn-inhabilitar:hover {
+            background-color: #FDEDEC;
+            border-color: var(--rojo-alerta);
+        }
+
+        .btn-habilitar {
+            color: var(--verde-exito);
+        }
+
+        .btn-habilitar:hover {
+            background-color: #EAFAF1;
+            border-color: var(--verde-exito);
+        }
+
+        /* MODAL DE USUARIO / PERMISOS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.activo { display: flex; }
+
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: var(--radio);
+            width: 100%;
+            max-width: 550px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-card h3 {
+            margin-bottom: 0.4rem;
+            color: var(--texto-oscuro);
+        }
+
+        .modal-card p {
+            font-size: 0.85rem;
+            color: var(--texto-mutado);
+            margin-bottom: 1.2rem;
+        }
+
+        .grupo-campo {
+            margin-bottom: 1rem;
+        }
+
+        .grupo-campo label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+
+        .grupo-campo input,
+        .grupo-campo select {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #BDC3C7;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .grid-dos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* CUADRÍCULA DE PERMISOS GRANULARES (RNF-14) */
+        .seccion-permisos-box {
+            background-color: #FAF6F0;
+            border: 1px solid var(--borde-suave);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .seccion-permisos-box h4 {
+            font-size: 0.9rem;
+            color: var(--acento-canela);
+            margin-bottom: 0.6rem;
+            border-bottom: 1px dashed var(--borde-suave);
+            padding-bottom: 0.4rem;
+        }
+
+        .grid-permisos-checkboxes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .permiso-label-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: var(--texto-oscuro);
+            background: #FFFFFF;
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid #E5E8E8;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .permiso-label-card input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--acento-canela);
+        }
+
+        .permiso-label-card.sensible {
+            border-color: #F9E79F;
+            background-color: #FFFDF9;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .btn-modal-secundario {
+            background: #ECE5DD;
+            border: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .btn-modal-primario {
+            background: var(--azul-link);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MENÚ LATERAL -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>CARMIR ADMIN</h2>
+            <p>Delicias de Postres</p>
+        </div>
+
+        <ul class="menu-navegacion">
+            <li><a href="admin-dashboard.html">📊 Dashboard Principal</a></li>
+            <li><a href="admin-pedidos.html">📝 Gestión de Pedidos</a></li>
+            <li><a href="admin-agenda.html">📅 Agenda de Producción</a></li>
+            <li id="nav-inventario"><a href="admin-inventario.html">📦 Control de Inventario</a></li>
+            <li id="nav-recetas"><a href="admin-recetas.html">🍰 Catálogo y Recetas</a></li>
+            <li id="nav-reportes"><a href="admin-reportes.html">📈 Reportes Financieros</a></li>
+            <li id="nav-usuarios"><a href="admin-usuarios.html" class="activo">👥 Personal y Permisos</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button type="button" class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                🔒 Bloquear / Salir
+            </button>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido-area">
+        
+        <header class="topbar">
+            <h1>Gestión de Personal, Cuentas y Permisos</h1>
+            <div class="usuario-badge" id="sesion-usuario-display">Admin: Cargando...</div>
+        </header>
+
+        <div class="workspace-usuarios">
+            
+            <!-- TOOLBAR -->
+            <div class="toolbar-usuarios">
+                <div class="buscador-caja">
+                    <input type="text" id="input-buscar-usuario" placeholder="Buscar por usuario o nombre de colaborador..." oninput="filtrarUsuarios()">
+                </div>
+
+                <button type="button" class="btn-nuevo-usuario" onclick="abrirModalNuevoUsuario()">
+                    ➕ Registrar Nuevo Colaborador
+                </button>
+            </div>
+
+            <!-- TABLA DE USUARIOS Y PERMISOS (RNF-1, RNF-11 a RNF-14) -->
+            <div class="contenedor-tabla-usuarios">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre Completo</th>
+                            <th>Rol</th>
+                            <th>Permisos Asignados (Módulos)</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo-tabla-usuarios">
+                        <!-- Inyectado por JS -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- MODAL: REGISTRAR / EDITAR USUARIO Y PERMISOS -->
+    <div id="modal-usuario" class="modal-overlay">
+        <div class="modal-card">
+            <h3 id="modal-usuario-titulo">Registrar Colaborador</h3>
+            <p>Configura las credenciales y define el nivel de acceso modular del empleado.</p>
+
+            <form onsubmit="guardarDatosUsuario(event)">
+                <input type="hidden" id="usuario-form-modo" value="crear">
+
+                <div class="grid-dos">
+                    <div class="grupo-campo">
+                        <label for="input-usuario-login">Usuario / Identificador: *</label>
+                        <input type="text" id="input-usuario-login" required placeholder="ej. maria_mostrador">
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="input-usuario-pin">PIN / Contraseña: *</label>
+                        <input type="password" id="input-usuario-pin" required placeholder="4 a 8 caracteres">
+                    </div>
+                </div>
+
+                <div class="grid-dos">
+                    <div class="grupo-campo">
+                        <label for="input-usuario-nombre">Nombre Completo: *</label>
+                        <input type="text" id="input-usuario-nombre" required placeholder="ej. María Morales Sánchez">
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="select-usuario-rol">Rol en la Repostería: *</label>
+                        <select id="select-usuario-rol" onchange="aplicarPlantillaSegunRol()">
+                            <option value="Personal">Personal Auxiliar (Mostrador / Cocina)</option>
+                            <option value="Administradora">Administradora (Dueña)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- MATRIZ DE PERMISOS GRANULARES (RNF-14) -->
+                <div class="seccion-permisos-box">
+                    <h4>Módulos Autorizados:</h4>
+                    <div class="grid-permisos-checkboxes">
+                        <label class="permiso-label-card">
+                            <input type="checkbox" id="perm-dashboard" value="dashboard">
+                            <span>📊 Dashboard Principal</span>
+                        </label>
+
+                        <label class="permiso-label-card">
+                            <input type="checkbox" id="perm-pedidos" value="pedidos">
+                            <span>📝 Gestión de Pedidos</span>
+                        </label>
+
+                        <label class="permiso-label-card">
+                            <input type="checkbox" id="perm-agenda" value="agenda">
+                            <span>📅 Agenda de Producción</span>
+                        </label>
+
+                        <label class="permiso-label-card">
+                            <input type="checkbox" id="perm-inventario" value="inventario">
+                            <span>📦 Inventario y Compras</span>
+                        </label>
+
+                        <label class="permiso-label-card">
+                            <input type="checkbox" id="perm-merma" value="inventario_merma">
+                            <span>⚠️ Salidas por Merma</span>
+                        </label>
+
+                        <label class="permiso-label-card">
+                            <input type="checkbox" id="perm-recetas" value="recetas">
+                            <span>🍰 Catálogo y Recetas</span>
+                        </label>
+
+                        <label class="permiso-label-card sensible">
+                            <input type="checkbox" id="perm-reportes" value="reportes_financieros">
+                            <span>🔒 Reportes Financieros (Utilidades)</span>
+                        </label>
+
+                        <label class="permiso-label-card sensible">
+                            <input type="checkbox" id="perm-usuarios" value="usuarios">
+                            <span>👥 Gestión de Personal</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal-secundario" onclick="cerrarModal('modal-usuario')">Cancelar</button>
+                    <button type="submit" class="btn-modal-primario">Guardar Usuario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- LÓGICA DE NEGOCIO Y PERSISTENCIA RBAC -->
+    <script>
+        let listaUsuarios = [];
+
+        // Validación estricta de perfil (Singleton / RBAC)
+        function validarSesion() {
+            const sesion = JSON.parse(localStorage.getItem('carmir_sesion_activa'));
+            if (!sesion) {
+                window.location.href = "admin-login.html";
+                return;
+            }
+
+            // Solo Administradora puede gestionar usuarios
+            const permisos = sesion.permisos || [];
+            if (!permisos.includes('usuarios')) {
+                alert("Acceso denegado: Se requieren permisos administrativos de Dueña para gestionar personal.");
+                window.location.href = "admin-dashboard.html";
+                return;
+            }
+
+            document.getElementById('sesion-usuario-display').textContent = `${sesion.rol}: ${sesion.nombre}`;
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('carmir_sesion_activa');
+            window.location.href = "admin-login.html";
+        }
+
+        // Carga de usuarios y persistencia
+        function cargarUsuarios() {
+            const guardados = localStorage.getItem('carmir_usuarios_db');
+            if (guardados) {
+                listaUsuarios = JSON.parse(guardados);
+            } else {
+                listaUsuarios = [
+                    {
+                        usuario: "ADMIN_DUEÑA",
+                        pin: "2026",
+                        nombre: "Ma. del Carmen Vázquez",
+                        rol: "Administradora",
+                        estado: true,
+                        permisos: ["dashboard", "pedidos", "agenda", "inventario", "inventario_merma", "recetas", "reportes_financieros", "usuarios"]
+                    },
+                    {
+                        usuario: "mostrador",
+                        pin: "4321",
+                        nombre: "Encargado de Mostrador",
+                        rol: "Personal",
+                        estado: true,
+                        permisos: ["dashboard", "pedidos", "agenda"]
+                    },
+                    {
+                        usuario: "cocina",
+                        pin: "1234",
+                        nombre: "Personal de Horneado",
+                        rol: "Personal",
+                        estado: true,
+                        permisos: ["pedidos", "agenda", "inventario_merma", "recetas"]
+                    }
+                ];
+                localStorage.setItem('carmir_usuarios_db', JSON.stringify(listaUsuarios));
+            }
+
+            renderizarTablaUsuarios();
+        }
+
+        function renderizarTablaUsuarios() {
+            const tbody = document.getElementById('cuerpo-tabla-usuarios');
+            const busqueda = document.getElementById('input-buscar-usuario').value.toLowerCase().trim();
+            tbody.innerHTML = '';
+
+            const filtrados = listaUsuarios.filter(u => 
+                u.usuario.toLowerCase().includes(busqueda) || 
+                u.nombre.toLowerCase().includes(busqueda) ||
+                u.rol.toLowerCase().includes(busqueda)
+            );
+
+            if (filtrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--texto-mutado); padding: 2rem;">No se encontraron usuarios coincidentes.</td></tr>`;
+                return;
+            }
+
+            filtrados.forEach(u => {
+                const tr = document.createElement('tr');
+                const esDuena = u.usuario === "ADMIN_DUEÑA";
+
+                // Badges de permisos
+                let chipsHtml = u.permisos.map(p => {
+                    const esFinanciero = p === 'reportes_financieros' || p === 'usuarios';
+                    return `<span class="chip-permiso ${esFinanciero ? 'financiero' : ''}">${p}</span>`;
+                }).join('');
+
+                tr.innerHTML = `
+                    <td><strong>${u.usuario}</strong></td>
+                    <td>${u.nombre}</td>
+                    <td><span class="badge-rol ${u.rol === 'Administradora' ? 'rol-admin' : 'rol-personal'}">${u.rol}</span></td>
+                    <td><div class="chips-permisos">${chipsHtml}</div></td>
+                    <td><span class="badge-estado ${u.estado ? 'estado-activo' : 'estado-inactivo'}">${u.estado ? '● Activo' : '○ Inactivo'}</span></td>
+                    <td>
+                        <div class="acciones-fila">
+                            <button type="button" class="btn-accion-icono" onclick="editarUsuario('${u.usuario}')" title="Editar Permisos">✏️</button>
+                            ${!esDuena ? `
+                                <button type="button" class="btn-accion-icono ${u.estado ? 'btn-inhabilitar' : 'btn-habilitar'}" onclick="alternarEstadoUsuario('${u.usuario}')" title="${u.estado ? 'Inhabilitar Cuenta' : 'Reactivar Cuenta'}">
+                                    ${u.estado ? '🚫' : '✓'}
+                                </button>
+                            ` : `<span style="font-size:0.75rem; color:var(--texto-mutado); padding:4px;">Principal</span>`}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ================= OPERACIONES CRUD Y PERMISOS =================
+        function abrirModalNuevoUsuario() {
+            document.getElementById('modal-usuario-titulo').textContent = "Registrar Colaborador";
+            document.getElementById('usuario-form-modo').value = "crear";
+            document.getElementById('input-usuario-login').value = "";
+            document.getElementById('input-usuario-login').readOnly = false;
+            document.getElementById('input-usuario-pin').value = "";
+            document.getElementById('input-usuario-nombre').value = "";
+            document.getElementById('select-usuario-rol').value = "Personal";
+            
+            limpiarCheckboxesPermisos();
+            aplicarPlantillaSegunRol();
+
+            document.getElementById('modal-usuario').classList.add('activo');
+        }
+
+        function editarUsuario(login) {
+            const u = listaUsuarios.find(user => user.usuario === login);
+            if (!u) return;
+
+            document.getElementById('modal-usuario-titulo').textContent = `Editar Usuario: ${u.usuario}`;
+            document.getElementById('usuario-form-modo').value = "editar";
+            document.getElementById('input-usuario-login').value = u.usuario;
+            document.getElementById('input-usuario-login').readOnly = true;
+            document.getElementById('input-usuario-pin').value = u.pin;
+            document.getElementById('input-usuario-nombre').value = u.nombre;
+            document.getElementById('select-usuario-rol').value = u.rol;
+
+            limpiarCheckboxesPermisos();
+            u.permisos.forEach(p => {
+                const chk = document.querySelector(`.grid-permisos-checkboxes input[value="${p}"]`);
+                if (chk) chk.checked = true;
+            });
+
+            document.getElementById('modal-usuario').classList.add('activo');
+        }
+
+        function aplicarPlantillaSegunRol() {
+            const rol = document.getElementById('select-usuario-rol').value;
+            if (rol === 'Administradora') {
+                document.querySelectorAll('.grid-permisos-checkboxes input[type="checkbox"]').forEach(c => c.checked = true);
+            }
+        }
+
+        function limpiarCheckboxesPermisos() {
+            document.querySelectorAll('.grid-permisos-checkboxes input[type="checkbox"]').forEach(c => c.checked = false);
+        }
+
+        function guardarDatosUsuario(e) {
+            e.preventDefault();
+            const modo = document.getElementById('usuario-form-modo').value;
+            const usuarioLogin = document.getElementById('input-usuario-login').value.trim();
+            const pin = document.getElementById('input-usuario-pin').value.trim();
+            const nombre = document.getElementById('input-usuario-nombre').value.trim();
+            const rol = document.getElementById('select-usuario-rol').value;
+
+            // Recoger permisos seleccionados
+            const permisosSeleccionados = [];
+            document.querySelectorAll('.grid-permisos-checkboxes input[type="checkbox"]:checked').forEach(c => {
+                permisosSeleccionados.push(c.value);
+            });
+
+            if (permisosSeleccionados.length === 0) {
+                alert("Debes asignar al menos un módulo de acceso al colaborador.");
+                return;
+            }
+
+            if (modo === 'crear') {
+                if (listaUsuarios.some(u => u.usuario.toLowerCase() === usuarioLogin.toLowerCase())) {
+                    alert("Ya existe un usuario con ese nombre identificador.");
+                    return;
+                }
+                listaUsuarios.push({
+                    usuario: usuarioLogin,
+                    pin: pin,
+                    nombre: nombre,
+                    rol: rol,
+                    estado: true,
+                    permisos: permisosSeleccionados
+                });
+            } else {
+                const u = listaUsuarios.find(user => user.usuario === usuarioLogin);
+                if (u) {
+                    u.pin = pin;
+                    u.nombre = nombre;
+                    u.rol = rol;
+                    u.permisos = permisosSeleccionados;
+                }
+            }
+
+            guardarPersistencia();
+            cerrarModal('modal-usuario');
+            renderizarTablaUsuarios();
+        }
+
+        // Inhabilitación de Cuentas (RNF-13)
+        function alternarEstadoUsuario(login) {
+            const u = listaUsuarios.find(user => user.usuario === login);
+            if (!u || u.usuario === "ADMIN_DUEÑA") return;
+
+            u.estado = !u.estado;
+            guardarPersistencia();
+            renderizarTablaUsuarios();
+        }
+
+        function cerrarModal(idModal) {
+            document.getElementById(idModal).classList.remove('activo');
+        }
+
+        function filtrarUsuarios() {
+            renderizarTablaUsuarios();
+        }
+
+        function guardarPersistencia() {
+            localStorage.setItem('carmir_usuarios_db', JSON.stringify(listaUsuarios));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            validarSesion();
+            cargarUsuarios();
+        });
+    </script>
+</body>
+</html>

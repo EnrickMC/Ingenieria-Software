@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARMIR Admin - Reportes Financieros y Ventas</title>
+    <style>
+        :root {
+            --bg-software: #EEF2F5;
+            --sidebar-fondo: #2C3E50;
+            --sidebar-header: #1A252F;
+            --sidebar-hover: #34495E;
+            --acento-canela: #D4A373;
+            --acento-dorado: #D29D6A;
+            --verde-exito: #2ECC71;
+            --verde-hover: #27AE60;
+            --azul-link: #3498DB;
+            --azul-hover: #2980B9;
+            --rojo-alerta: #E74C3C;
+            --amarillo-aviso: #F39C12;
+            --texto-oscuro: #2C3E50;
+            --texto-mutado: #7F8C8D;
+            --borde-suave: #ECF0F1;
+            --fuente-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --radio: 8px;
+            --sombra-card: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente-base);
+            background-color: var(--bg-software);
+            color: var(--texto-oscuro);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* BARRA LATERAL (SIDEBAR) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-fondo);
+            color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1.2rem;
+            background-color: var(--sidebar-header);
+            text-align: center;
+            border-bottom: 1px solid var(--sidebar-hover);
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            color: var(--acento-canela);
+            letter-spacing: 1.5px;
+        }
+
+        .sidebar-header p {
+            margin: 4px 0 0;
+            font-size: 0.75rem;
+            color: #BDC3C7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-navegacion {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-navegacion li {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-navegacion a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #ECF0F1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .menu-navegacion a:hover,
+        .menu-navegacion a.activo {
+            background-color: var(--sidebar-hover);
+            border-left: 4px solid var(--acento-canela);
+            color: #FFFFFF;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            background-color: var(--sidebar-header);
+            border-top: 1px solid var(--sidebar-hover);
+        }
+
+        .btn-cerrar-sesion {
+            width: 100%;
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #E74C3C;
+            border: 1px solid #E74C3C;
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cerrar-sesion:hover {
+            background-color: #E74C3C;
+            color: #FFFFFF;
+        }
+
+        /* ÁREA DE CONTENIDO */
+        .contenido-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            background-color: #FFFFFF;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .topbar h1 {
+            font-size: 1.45rem;
+            color: var(--texto-oscuro);
+        }
+
+        .usuario-badge {
+            background-color: #FAF3E0;
+            border: 1px solid #F0E2D0;
+            color: var(--texto-oscuro);
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* WORKSPACE DE REPORTES */
+        .workspace-reportes {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* BARRA DE HERRAMIENTAS Y FILTRO DE FECHAS (RF-45) */
+        .toolbar-reportes {
+            background: #FFFFFF;
+            padding: 1.2rem 1.5rem;
+            border-radius: var(--radio);
+            box-shadow: var(--sombra-card);
+            border: 1px solid var(--borde-suave);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filtros-rango {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filtros-rango label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--texto-oscuro);
+        }
+
+        .filtros-rango input[type="date"] {
+            padding: 0.55rem 0.8rem;
+            border: 1px solid #BDC3C7;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            background-color: #FAF6F0;
+            font-family: inherit;
+        }
+
+        .btn-filtro-rapido {
+            background: #F8F9FA;
+            border: 1px solid #DCD0C0;
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-filtro-rapido:hover,
+        .btn-filtro-rapido.activo {
+            background-color: var(--sidebar-fondo);
+            color: #FFFFFF;
+            border-color: var(--sidebar-fondo);
+        }
+
+        .botones-reportes {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-exportar-excel {
+            background-color: var(--verde-exito);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-exportar-excel:hover {
+            background-color: var(--verde-hover);
+        }
+
+        /* TARJETAS DE CONSOLIDADO FINANCIERO (KPIs) */
+        .kpi-reportes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .kpi-card-rep {
+            background: #FFFFFF;
+            padding: 1.5rem;
+            border-radius: var(--radio);
+            box-shadow: var(--sombra-card);
+            border-left: 5px solid var(--azul-link);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .kpi-card-rep.ingreso { border-left-color: var(--verde-exito); }
+        .kpi-card-rep.egreso { border-left-color: var(--rojo-alerta); }
+        .kpi-card-rep.utilidad { border-left-color: var(--acento-canela); }
+
+        .kpi-rep-titulo {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--texto-mutado);
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .kpi-rep-valor {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--texto-oscuro);
+        }
+
+        .kpi-rep-sub {
+            font-size: 0.78rem;
+            color: var(--texto-mutado);
+            margin-top: 0.4rem;
+        }
+
+        /* GRID PRINCIPAL: 2 PANELES INFORMATIVOS */
+        .grid-paneles-reporte {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .panel-blanco-reporte {
+            background: #FFFFFF;
+            border-radius: var(--radio);
+            padding: 1.5rem;
+            box-shadow: var(--sombra-card);
+            border: 1px solid var(--borde-suave);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-blanco-reporte h3 {
+            font-size: 1.15rem;
+            color: var(--texto-oscuro);
+            border-bottom: 2px solid var(--borde-suave);
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* TABLA DE MOVIMIENTOS CONTABLES */
+        .tabla-scroll-reporte {
+            overflow-y: auto;
+            max-height: 380px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--borde-suave);
+        }
+
+        th {
+            background-color: #F8F9FA;
+            color: var(--texto-mutado);
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+        }
+
+        .tag-tipo {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tag-ingreso { background-color: #EAFAF1; color: #196F3D; }
+        .tag-compra { background-color: #FDEDEC; color: #922B21; }
+        .tag-merma { background-color: #FEF9E7; color: #B7950B; }
+
+        /* RANKING DE PRODUCTOS MÁS VENDIDOS (RF-46) */
+        .item-ranking-barra {
+            margin-bottom: 1.2rem;
+        }
+
+        .ranking-info-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .ranking-info-top strong {
+            color: var(--texto-oscuro);
+        }
+
+        .ranking-info-top span {
+            color: var(--texto-mutado);
+            font-size: 0.8rem;
+        }
+
+        .progreso-barra-fondo {
+            height: 12px;
+            background-color: #F0E2D0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progreso-barra-relleno {
+            height: 100%;
+            background-color: var(--primario-rosa, #E28D8D);
+            border-radius: 6px;
+            transition: width 0.4s ease;
+        }
+
+        .sin-datos-reporte {
+            text-align: center;
+            padding: 2.5rem;
+            color: var(--texto-mutado);
+            font-size: 0.88rem;
+        }
+
+        @media (max-width: 1000px) {
+            .grid-paneles-reporte {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MENÚ LATERAL -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>CARMIR ADMIN</h2>
+            <p>Delicias de Postres</p>
+        </div>
+
+        <ul class="menu-navegacion">
+            <li><a href="admin-dashboard.html">📊 Dashboard Principal</a></li>
+            <li><a href="admin-pedidos.html">📝 Gestión de Pedidos</a></li>
+            <li><a href="admin-agenda.html">📅 Agenda de Producción</a></li>
+            <li id="nav-inventario"><a href="admin-inventario.html">📦 Control de Inventario</a></li>
+            <li id="nav-recetas"><a href="admin-recetas.html">🍰 Catálogo y Recetas</a></li>
+            <li id="nav-reportes"><a href="admin-reportes.html" class="activo">📈 Reportes Financieros</a></li>
+            <li id="nav-usuarios"><a href="admin-usuarios.html">👥 Personal y Permisos</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button type="button" class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                🔒 Bloquear / Salir
+            </button>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido-area">
+        
+        <header class="topbar">
+            <h1>Reportes Financieros y Análisis de Demanda</h1>
+            <div class="usuario-badge" id="sesion-usuario-display">Admin: Cargando...</div>
+        </header>
+
+        <div class="workspace-reportes">
+            
+            <!-- TOOLBAR DE FILTROS POR FECHA Y EXPORTACIÓN (RF-45, RF-47) -->
+            <div class="toolbar-reportes">
+                <div class="filtros-rango">
+                    <button type="button" class="btn-filtro-rapido" onclick="establecerFiltroRapido('hoy', this)">Hoy</button>
+                    <button type="button" class="btn-filtro-rapido" onclick="establecerFiltroRapido('semana', this)">Esta Semana</button>
+                    <button type="button" class="btn-filtro-rapido activo" onclick="establecerFiltroRapido('mes', this)">Este Mes</button>
+                    
+                    <span style="color: var(--borde-suave); margin: 0 4px;">|</span>
+                    
+                    <label for="fecha-inicio">Desde:</label>
+                    <input type="date" id="fecha-inicio" onchange="aplicarFiltroPersonalizado()">
+                    <label for="fecha-fin">Hasta:</label>
+                    <input type="date" id="fecha-fin" onchange="aplicarFiltroPersonalizado()">
+                </div>
+
+                <div class="botones-reportes">
+                    <button type="button" class="btn-exportar-excel" onclick="exportarReportesExcel()">
+                        📊 Exportar a Excel (.CSV)
+                    </button>
+                </div>
+            </div>
+
+            <!-- TARJETAS DE CONSOLIDADO FINANCIERO (KPIs RF-45) -->
+            <section class="kpi-reportes-grid">
+                
+                <article class="kpi-card-rep ingreso">
+                    <div class="kpi-rep-titulo">
+                        <span>Ingresos por Ventas</span>
+                        <span>💵</span>
+                    </div>
+                    <div class="kpi-rep-valor" id="rep-total-ingresos" style="color: var(--verde-hover);">$0.00</div>
+                    <div class="kpi-rep-sub" id="rep-sub-ingresos">0 pedidos cobrados</div>
+                </article>
+
+                <article class="kpi-card-rep egreso">
+                    <div class="kpi-rep-titulo">
+                        <span>Egresos e Insumos</span>
+                        <span>🛒</span>
+                    </div>
+                    <div class="kpi-rep-valor" id="rep-total-egresos" style="color: var(--rojo-alerta);">$0.00</div>
+                    <div class="kpi-rep-sub" id="rep-sub-egresos">Compras de almacén y mermas</div>
+                </article>
+
+                <article class="kpi-card-rep utilidad">
+                    <div class="kpi-rep-titulo">
+                        <span>Utilidad Bruta</span>
+                        <span>📈</span>
+                    </div>
+                    <div class="kpi-rep-valor" id="rep-total-utilidad">$0.00</div>
+                    <div class="kpi-rep-sub" id="rep-sub-margen">Margen Comercial: 0.0%</div>
+                </article>
+
+                <article class="kpi-card-rep">
+                    <div class="kpi-rep-titulo">
+                        <span>Ticket Promedio</span>
+                        <span>🏷️</span>
+                    </div>
+                    <div class="kpi-rep-valor" id="rep-ticket-promedio">$0.00</div>
+                    <div class="kpi-rep-sub">Por orden concretada</div>
+                </article>
+
+            </section>
+
+            <!-- PANELES DE DETALLE: BALANCE Y RANKING DE VENTAS -->
+            <div class="grid-paneles-reporte">
+                
+                <!-- PANEL 1: MOVIMIENTOS FINANCIEROS AUDITABLES (RF-45) -->
+                <section class="panel-blanco-reporte">
+                    <h3>
+                        <span>Libro Diario de Movimientos Contables</span>
+                        <span id="contador-movimientos" style="font-size: 0.8rem; color: var(--texto-mutado); font-weight: normal;">0 registros</span>
+                    </h3>
+
+                    <div class="tabla-scroll-reporte">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Concepto / Referencia</th>
+                                    <th>Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpo-tabla-movimientos">
+                                <!-- Filas inyectadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- PANEL 2: PRODUCTOS MÁS VENDIDOS (RF-46) -->
+                <section class="panel-blanco-reporte">
+                    <h3>
+                        <span>Ranking de Postres con Mayor Demanda</span>
+                        <span style="font-size: 0.8rem; color: var(--texto-mutado); font-weight: normal;">Por volumen</span>
+                    </h3>
+
+                    <div id="contenedor-ranking-productos" style="overflow-y: auto; max-height: 380px; padding-right: 5px;">
+                        <!-- Barras inyectadas por JS -->
+                    </div>
+                </section>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- LÓGICA DE NEGOCIO Y CONSOLIDACIÓN ANALÍTICA -->
+    <script>
+        let fechaInicioFiltro = null;
+        let fechaFinFiltro = null;
+        let listaMovimientosConsolidados = [];
+        let rankingProductosConsolidados = [];
+
+        // Validación estricta de perfil (Singleton / RBAC)
+        function validarSesion() {
+            const sesion = JSON.parse(localStorage.getItem('carmir_sesion_activa'));
+            if (!sesion) {
+                window.location.href = "admin-login.html";
+                return;
+            }
+
+            // RESTRICCIÓN DE SEGURIDAD: Solo Administrador puede ver reportes financieros (ERS)
+            const permisos = sesion.permisos || [];
+            if (!permisos.includes('reportes_financieros')) {
+                alert("Acceso restringido: No cuentas con permisos para consultar información financiera y costos del negocio.");
+                window.location.href = "admin-dashboard.html";
+                return;
+            }
+
+            document.getElementById('sesion-usuario-display').textContent = `${sesion.rol}: ${sesion.nombre}`;
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('carmir_sesion_activa');
+            window.location.href = "admin-login.html";
+        }
+
+        // Semillas complementarias para demostración inmediata
+        function inicializarDatosContablesSemilla() {
+            // Asegurar lotes de compra
+            if (!localStorage.getItem('carmir_lotes_reabastecimiento')) {
+                const lotes = [
+                    { idReabastecimiento: 1, idInventario: "INS-001", nombre: "Harina de Trigo", cantidad: 25, costoTotal: 450.00, fechaCompra: "2026-09-28" },
+                    { idReabastecimiento: 2, idInventario: "INS-002", nombre: "Azúcar Refinada", cantidad: 15, costoTotal: 390.00, fechaCompra: "2026-09-30" },
+                    { idReabastecimiento: 3, idInventario: "INS-005", nombre: "Leche Entera", cantidad: 20, costoTotal: 480.00, fechaCompra: "2026-10-01" }
+                ];
+                localStorage.setItem('carmir_lotes_reabastecimiento', JSON.stringify(lotes));
+            }
+
+            // Asegurar mermas registradas
+            if (!localStorage.getItem('carmir_mermas')) {
+                const mermas = [
+                    { idMerma: 1, idInventario: "INS-003", nombre: "Fresa Natural", cantidad: 1.0, unidad: "Kg", causa: "Caducidad de Lote", fecha: "2026-09-29T11:00:00" },
+                    { idMerma: 2, idInventario: "INS-006", nombre: "Huevo Blanco", cantidad: 6, unidad: "Piezas", causa: "Desperdicio en Horneado", fecha: "2026-10-01T09:30:00" }
+                ];
+                localStorage.setItem('carmir_mermas', JSON.stringify(mermas));
+            }
+        }
+
+        // Filtros de Fecha Rápidos
+        function establecerFiltroRapido(tipo, btn) {
+            document.querySelectorAll('.btn-filtro-rapido').forEach(b => b.classList.remove('activo'));
+            if (btn) btn.classList.add('activo');
+
+            const hoy = new Date(2026, 9, 1); // 01 Octubre 2026
+            const inputIni = document.getElementById('fecha-inicio');
+            const inputFin = document.getElementById('fecha-fin');
+
+            if (tipo === 'hoy') {
+                fechaInicioFiltro = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+                fechaFinFiltro = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59);
+            } else if (tipo === 'semana') {
+                const diaSem = (hoy.getDay() + 6) % 7;
+                fechaInicioFiltro = new Date(hoy);
+                fechaInicioFiltro.setDate(hoy.getDate() - diaSem);
+                fechaInicioFiltro.setHours(0, 0, 0);
+
+                fechaFinFiltro = new Date(fechaInicioFiltro);
+                fechaFinFiltro.setDate(fechaInicioFiltro.getDate() + 6);
+                fechaFinFiltro.setHours(23, 59, 59);
+            } else if (tipo === 'mes') {
+                fechaInicioFiltro = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                fechaFinFiltro = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0, 23, 59, 59);
+            }
+
+            inputIni.value = fechaInicioFiltro.toISOString().split('T')[0];
+            inputFin.value = fechaFinFiltro.toISOString().split('T')[0];
+
+            procesarReportes();
+        }
+
+        function aplicarFiltroPersonalizado() {
+            document.querySelectorAll('.btn-filtro-rapido').forEach(b => b.classList.remove('activo'));
+            const ini = document.getElementById('fecha-inicio').value;
+            const fin = document.getElementById('fecha-fin').value;
+
+            if (ini && fin) {
+                fechaInicioFiltro = new Date(ini + "T00:00:00");
+                fechaFinFiltro = new Date(fin + "T23:59:59");
+                procesarReportes();
+            }
+        }
+
+        // Motor de Cálculo y Consolidación (RF-45, RF-46)
+        function procesarReportes() {
+            const pedidos = JSON.parse(localStorage.getItem('carmir_pedidos')) || [];
+            const compras = JSON.parse(localStorage.getItem('carmir_lotes_reabastecimiento')) || [];
+            const mermas = JSON.parse(localStorage.getItem('carmir_mermas')) || [];
+            const inventario = JSON.parse(localStorage.getItem('carmir_inventario')) || [];
+
+            listaMovimientosConsolidados = [];
+            let totalIngresos = 0;
+            let totalEgresos = 0;
+            let pedidosValidosContados = 0;
+            const contadorProductos = {};
+
+            // 1. Procesar Ventas (Ingresos)
+            pedidos.forEach(p => {
+                const fechaP = new Date(p.fechaCreacion);
+                if (fechaP >= fechaInicioFiltro && fechaP <= fechaFinFiltro) {
+                    const cobrado = (p.pago.montoPagado && p.pago.montoPagado > 0) ? p.pago.montoPagado : (p.pago.montoTotal || 0);
+
+                    if (!p.estado.toLowerCase().includes('cancelado')) {
+                        totalIngresos += cobrado;
+                        pedidosValidosContados++;
+
+                        listaMovimientosConsolidados.push({
+                            fecha: p.fechaCreacion,
+                            tipo: 'Ingreso',
+                            concepto: `Venta Pedido ${p.folio} (${p.cliente.nombre})`,
+                            monto: cobrado
+                        });
+
+                        // Conteo de postres para ranking
+                        p.productos.forEach(it => {
+                            const cant = it.cantidad || 1;
+                            const sub = it.precio * cant;
+                            if (!contadorProductos[it.nombre]) {
+                                contadorProductos[it.nombre] = { unidades: 0, ingresos: 0, categoria: it.categoria || "Especialidad" };
+                            }
+                            contadorProductos[it.nombre].unidades += cant;
+                            contadorProductos[it.nombre].ingresos += sub;
+                        });
+                    }
+                }
+            });
+
+            // 2. Procesar Compras de Insumos (Egresos)
+            compras.forEach(c => {
+                const fechaC = new Date(c.fechaCompra + "T12:00:00");
+                if (fechaC >= fechaInicioFiltro && fechaC <= fechaFinFiltro) {
+                    totalEgresos += c.costoTotal;
+                    listaMovimientosConsolidados.push({
+                        fecha: c.fechaCompra + "T12:00:00",
+                        tipo: 'Compra',
+                        concepto: `Adquisición de Lote: ${c.nombre} (${c.cantidad})`,
+                        monto: -c.costoTotal
+                    });
+                }
+            });
+
+            // 3. Procesar Mermas / Desperdicios Valorados (Egresos)
+            mermas.forEach(m => {
+                const fechaM = new Date(m.fecha);
+                if (fechaM >= fechaInicioFiltro && fechaM <= fechaFinFiltro) {
+                    const insumo = inventario.find(i => i.id === m.idInventario);
+                    const precioU = insumo ? insumo.precioUnitario : 20.00;
+                    const costoMerma = +(m.cantidad * precioU).toFixed(2);
+
+                    totalEgresos += costoMerma;
+                    listaMovimientosConsolidados.push({
+                        fecha: m.fecha,
+                        tipo: 'Merma',
+                        concepto: `Baja por Merma: ${m.nombre} (${m.causa})`,
+                        monto: -costoMerma
+                    });
+                }
+            });
+
+            // Ordenar movimientos por fecha descendente
+            listaMovimientosConsolidados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            // Actualizar KPIs de Pantalla
+            const utilidad = totalIngresos - totalEgresos;
+            const margen = totalIngresos > 0 ? ((utilidad / totalIngresos) * 100).toFixed(1) : 0;
+            const ticketPromedio = pedidosValidosContados > 0 ? (totalIngresos / pedidosValidosContados).toFixed(2) : "0.00";
+
+            document.getElementById('rep-total-ingresos').textContent = `$${totalIngresos.toFixed(2)}`;
+            document.getElementById('rep-sub-ingresos').textContent = `${pedidosValidosContados} pedidos cobrados`;
+            document.getElementById('rep-total-egresos').textContent = `$${totalEgresos.toFixed(2)}`;
+            document.getElementById('rep-total-utilidad').textContent = `$${utilidad.toFixed(2)}`;
+            document.getElementById('rep-total-utilidad').style.color = utilidad >= 0 ? "var(--acento-canela)" : "var(--rojo-alerta)";
+            document.getElementById('rep-sub-margen').textContent = `Margen Comercial: ${margen}%`;
+            document.getElementById('rep-ticket-promedio').textContent = `$${ticketPromedio}`;
+
+            renderizarTablaMovimientos();
+            renderizarRankingProductos(contadorProductos);
+        }
+
+        // Renderizado del Libro Diario
+        function renderizarTablaMovimientos() {
+            const tbody = document.getElementById('cuerpo-tabla-movimientos');
+            const contadorEl = document.getElementById('contador-movimientos');
+            tbody.innerHTML = '';
+
+            contadorEl.textContent = `${listaMovimientosConsolidados.length} registros`;
+
+            if (listaMovimientosConsolidados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="sin-datos-reporte">No hay transacciones registradas en este período.</td></tr>`;
+                return;
+            }
+
+            listaMovimientosConsolidados.forEach(m => {
+                const tr = document.createElement('tr');
+                const esPositivo = m.monto >= 0;
+
+                let claseTag = 'tag-ingreso';
+                if (m.tipo === 'Compra') claseTag = 'tag-compra';
+                else if (m.tipo === 'Merma') claseTag = 'tag-merma';
+
+                tr.innerHTML = `
+                    <td>${new Date(m.fecha).toLocaleDateString('es-MX')}</td>
+                    <td><span class="tag-tipo ${claseTag}">${m.tipo}</span></td>
+                    <td><strong>${m.concepto}</strong></td>
+                    <td style="font-weight: 700; color: ${esPositivo ? 'var(--verde-hover)' : 'var(--rojo-alerta)'};">
+                        ${esPositivo ? '+' : ''}$${m.monto.toFixed(2)}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Renderizado del Ranking (RF-46)
+        function renderizarRankingProductos(dictProductos) {
+            const contenedor = document.getElementById('contenedor-ranking-productos');
+            contenedor.innerHTML = '';
+
+            rankingProductosConsolidados = Object.keys(dictProductos).map(nombre => ({
+                nombre: nombre,
+                unidades: dictProductos[nombre].unidades,
+                ingresos: dictProductos[nombre].ingresos,
+                categoria: dictProductos[nombre].categoria
+            }));
+
+            // Ordenar por unidades vendidas descendente
+            rankingProductosConsolidados.sort((a, b) => b.unidades - a.unidades);
+
+            if (rankingProductosConsolidados.length === 0) {
+                contenedor.innerHTML = `<div class="sin-datos-reporte">No se registraron ventas de postres en este período.</div>`;
+                return;
+            }
+
+            const maxUnidades = rankingProductosConsolidados[0].unidades || 1;
+
+            rankingProductosConsolidados.forEach((p, idx) => {
+                const porcentajeBarra = Math.round((p.unidades / maxUnidades) * 100);
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item-ranking-barra';
+
+                itemDiv.innerHTML = `
+                    <div class="ranking-info-top">
+                        <strong>#${idx + 1} ${p.nombre}</strong>
+                        <span><strong>${p.unidades} unidades</strong> ($${p.ingresos.toFixed(2)})</span>
+                    </div>
+                    <div class="progreso-barra-fondo">
+                        <div class="progreso-barra-relleno" style="width: ${porcentajeBarra}%;"></div>
+                    </div>
+                `;
+                contenedor.appendChild(itemDiv);
+            });
+        }
+
+        // Exportación de Reportes a CSV compatible nativamente con Excel (RF-47)
+        function exportarReportesExcel() {
+            if (listaMovimientosConsolidados.length === 0 && rankingProductosConsolidados.length === 0) {
+                alert("No hay información financiera para exportar en este período.");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+
+            // Encabezado de la entidad financiera
+            csvContent += "=== REPORTE FINANCIERO Y ANALITICO CARMIR ===\r\n";
+            csvContent += `Periodo: Desde ${document.getElementById('fecha-inicio').value} Hasta ${document.getElementById('fecha-fin').value}\r\n`;
+            csvContent += `Ingresos Totales,$${document.getElementById('rep-total-ingresos').textContent.replace('$', '')}\r\n`;
+            csvContent += `Egresos Totales,$${document.getElementById('rep-total-egresos').textContent.replace('$', '')}\r\n`;
+            csvContent += `Utilidad Bruta,$${document.getElementById('rep-total-utilidad').textContent.replace('$', '')}\r\n\r\n`;
+
+            // Sección 1: Libro Diario
+            csvContent += "--- LIBRO DIARIO DE MOVIMIENTOS ---\r\n";
+            csvContent += "Fecha,TipoMovimiento,Concepto,MontoMXN\r\n";
+            listaMovimientosConsolidados.forEach(m => {
+                csvContent += `"${new Date(m.fecha).toLocaleDateString('es-MX')}","${m.tipo}","${m.concepto}",${m.monto.toFixed(2)}\r\n`;
+            });
+
+            csvContent += "\r\n";
+
+            // Sección 2: Ranking de Postres
+            csvContent += "--- RANKING DE PRODUCTOS MAS VENDIDOS ---\r\n";
+            csvContent += "Posicion,Producto,UnidadesVendidas,IngresoTotalGeneradoMXN\r\n";
+            rankingProductosConsolidados.forEach((p, index) => {
+                csvContent += `${index + 1},"${p.nombre}",${p.unidades},${p.ingresos.toFixed(2)}\r\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Reporte_Financiero_CARMIR_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            validarSesion();
+            inicializarDatosContablesSemilla();
+            establecerFiltroRapido('mes', document.querySelector('.btn-filtro-rapido.activo'));
+        });
+    </script>
+</body>
+</html>
